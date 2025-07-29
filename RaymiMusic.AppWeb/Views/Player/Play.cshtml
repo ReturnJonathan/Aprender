@@ -1,123 +1,171 @@
 ﻿@model RaymiMusic.AppWeb.Models.SongDTO
 @{
     ViewData["Title"] = "Reproductor";
-     var userPlan = ViewBag.UserPlan;  // Obtener el plan de suscripción del usuario
 }
 
-<div class="container py-5">
-    <div class="card mx-auto" style="max-width: 600px;">
-        <div class="card-body text-center">
-            <h2 class="card-title">@Model.Titulo</h2>
-            <p class="text-muted">@Model.ArtistaNombre &mdash; @Model.AlbumNombre</p>
+<div id="antiforgery-token">
+    @Html.AntiForgeryToken()
+</div>
 
-            <audio id="audioPlayer" data-id="@Model.Id" controls autoplay style="width: 100%; margin-bottom: 1rem;">
-                <source src="@Model.RutaArchivo" type="audio/mpeg" />
-                Tu navegador no soporta reproducción de audio.
-            </audio>
+<!-- Reproductor principal estilo Spotify -->
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card bg-dark text-white border-0 shadow-lg rounded-3">
+                <div class="card-body p-5">
+                    <!-- Header de la canción -->
+                    <div class="text-center mb-4">
+                        <div class="bg-gradient rounded-3 mx-auto mb-4 d-flex align-items-center justify-content-center"
+                             style="width: 200px; height: 200px;">
+                            <i style="font-size: 4rem;">🎵</i>
+                        </div>
+                        <h2 class="fw-bold mb-2">@Model.Titulo</h2>
+                        <p class="text-white-50 mb-0">
+                            <span class="me-3">
+                                <i class="me-1">👤</i> @Model.ArtistaNombre
+                            </span>
+                            <span>
+                                <i class="me-1">💿</i> @Model.AlbumNombre
+                            </span>
+                        </p>
+                    </div>
 
+                    <button id="btnLike" class="btn btn-outline-danger mb-4">
+                        ❤ @((ViewBag.Like as bool?) == true ? "Quitar Me Gusta" : "Dar Me Gusta")
+                    </button>
 
-            @* Mostrar anuncio después del reproductor *@
-            @if (ViewBag.Anuncio != null)
-            {
-                <div class="mb-3">
-                    <img src="@ViewBag.Anuncio" alt="Publicidad" class="img-fluid rounded" />
+                    <!-- Reproductor de audio -->
+                    <div class="mb-4">
+                        <audio id="audioPlayer" data-id="@Model.Id" controls autoplay class="w-100 rounded">
+                            <source src="@Model.RutaArchivo" type="audio/mpeg" />
+                            Tu navegador no soporta reproducción de audio.
+                        </audio>
+                    </div>
+
+                    <!-- Anuncio si es usuario Free -->
+                    @if (ViewBag.Anuncio != null)
+                    {
+                        <div class="card bg-warning text-dark mb-4 rounded-3">
+                            <div class="card-body text-center p-3">
+                                <h6 class="mb-2">
+                                    <i class="me-1">📢</i> Publicidad
+                                </h6>
+                                <img src="@ViewBag.Anuncio" alt="Publicidad" class="img-fluid rounded" style="max-height: 150px;" />
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Controles de navegación -->
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        @if (ViewBag.CancionAnterior != null)
+                        {
+                            <a asp-controller="Player" asp-action="Play"
+                               asp-route-id="@ViewBag.CancionAnterior"
+                               asp-route-playlistId="@ViewBag.PlaylistId"
+                               class="btn btn-outline-light rounded-pill px-4">
+                                <i class="me-1">⏮</i> Anterior
+                            </a>
+                        }
+                        @if (ViewBag.CancionSiguiente != null)
+                        {
+                            <a asp-controller="Player" asp-action="Play"
+                               asp-route-id="@ViewBag.CancionSiguiente"
+                               asp-route-playlistId="@ViewBag.PlaylistId"
+                               class="btn btn-outline-light rounded-pill px-4">
+                                <i class="me-1">⏭</i> Siguiente
+                            </a>
+                        }
+                        @if (ViewBag.PlaylistId != null)
+                        {
+                            <button id="btnAleatorio" class="btn @(ViewBag.ModoAleatorio ? "btn-success" : "btn-outline-success") rounded-pill px-4">
+                                <i class="me-1">🔀</i> @(ViewBag.ModoAleatorio ? "Aleatorio ON" : "Aleatorio OFF")
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Acciones de la canción -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="@ViewBag.ReturnUrl" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="me-1">⬅</i> Volver
+                        </a>
+                        <a asp-controller="Playlists"
+                           asp-action="AddSong"
+                           asp-route-songId="@Model.Id"
+                           class="btn btn-success rounded-pill px-4">
+                            <i class="me-1">➕</i> Agregar a playlist
+                        </a>
+                        <a id="btnDescargar"
+                           class="btn btn-outline-primary rounded-pill px-4"
+                           href="/Canciones/Descargar/@Model.Id">
+                            <i class="me-1">⬇</i> Descargar
+                        </a>
+                    </div>
                 </div>
-            }
-
-            <div>
-                <a href="@ViewBag.ReturnUrl" class="btn btn-outline-secondary me-2">
-                    ← Volver
-                </a>
-    
-
-                <a asp-controller="Playlists"
-                   asp-action="AddSong"
-                   asp-route-songId="@Model.Id"
-                   class="btn btn-success">
-                    + Agregar a mi playlist
-                </a>
-                <a id="btnDescargar"
-                   class="btn btn-outline-primary"
-                   href="/Canciones/Descargar/@Model.Id">
-                    <i class="bi bi-download"></i> Descargar canción
-                </a>
             </div>
         </div>
     </div>
 </div>
-<div class="d-flex justify-content-center gap-2 mt-3">
 
-    @if (ViewBag.CancionAnterior != null)
-    {
-        <a asp-controller="Player" asp-action="Play"
-           asp-route-id="@ViewBag.CancionAnterior"
-           asp-route-playlistId="@ViewBag.PlaylistId"
-           class="btn btn-outline-light">
-            ⏮ Anterior
-        </a>
-    }
-
-    @if (ViewBag.CancionSiguiente != null)
-    {
-        <a asp-controller="Player" asp-action="Play"
-           asp-route-id="@ViewBag.CancionSiguiente"
-           asp-route-playlistId="@ViewBag.PlaylistId"
-           class="btn btn-outline-light">
-            ⏭ Siguiente
-        </a>
-    }
-
-    @if (ViewBag.PlaylistId != null)
-    {
-            <button id="btnAleatorio" class="btn @(ViewBag.ModoAleatorio ? "btn-info" : "btn-outline-info")">
-                🔀 @(ViewBag.ModoAleatorio ? "Aleatorio ON" : "Aleatorio OFF")
-            </button>
-    }
-
-</div>
 @section Scripts {
     <script src="~/js/reproductor.js"></script>
+
     <script>
-        document.getElementById('btnAleatorio').addEventListener('click', function () {
-            fetch('/Player/ToggleAleatorioAjax', {
+        // Toggle Aleatorio
+        document.getElementById('btnAleatorio')?.addEventListener('click', function () {
+            fetch('@Url.Action("ToggleAleatorioAjax", "Player")', {
                 method: 'POST',
                 headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '',
+                    'RequestVerificationToken': document.querySelector('#antiforgery-token input[name="__RequestVerificationToken"]').value,
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 const btn = document.getElementById('btnAleatorio');
                 if (data.estado) {
                     btn.textContent = "🔀 Aleatorio ON";
-                    btn.classList.remove("btn-outline-info");
-                    btn.classList.add("btn-info");
+                    btn.classList.replace("btn-outline-success","btn-success");
                 } else {
                     btn.textContent = "🔀 Aleatorio OFF";
-                    btn.classList.remove("btn-info");
-                    btn.classList.add("btn-outline-info");
+                    btn.classList.replace("btn-success","btn-outline-success");
                 }
             });
         });
+
+        // Auto-play siguiente al terminar
+        document.getElementById("audioPlayer")?.addEventListener("ended", function () {
+            const siguiente = "@ViewBag.CancionSiguiente";
+            const playlist = "@ViewBag.PlaylistId";
+            if (siguiente) {
+                let url = `@Url.Action("Play", "Player")?id=${siguiente}`;
+                if (playlist) url += `&playlistId=${playlist}`;
+                window.location.href = url;
+            }
+        });
+
+        // Toggle Like
+        document.getElementById('btnLike')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            const token = document.querySelector('#antiforgery-token input[name="__RequestVerificationToken"]').value;
+            fetch('@Url.Action("ToggleLike", "Player")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify("@Model.Id")
+            })
+            .then(res => {
+                if (!res.ok) throw new Error(res.statusText);
+                return res.json();
+            })
+            .then(data => {
+                const btn = document.getElementById('btnLike');
+                btn.textContent = data.liked
+                    ? '❤ Quitar Me Gusta'
+                    : '❤ Dar Me Gusta';
+            })
+            .catch(err => console.error("Error en ToggleLike:", err));
+        });
     </script>
 }
-<script>
-    const audio = document.getElementById("player");
-
-    audio.addEventListener("ended", function () {
-        const siguiente = "@ViewBag.CancionSiguiente";
-        const playlist = "@ViewBag.PlaylistId";
-
-        if (siguiente) {
-            let url = `/Player/Play/${siguiente}`;
-            if (playlist) {
-                url += `?playlistId=${playlist}`;
-            }
-            window.location.href = url;
-        }
-    });
-</script>
-}
-
-

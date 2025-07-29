@@ -4,7 +4,7 @@
     ViewData["Title"] = Model.Nombre;
 }
 
-<h1>@Model.Nombre</h1>
+<h1 class="text-white">@Model.Nombre</h1>
 <p>
     @if (Model.EsPublica)
     {
@@ -18,11 +18,11 @@
 
 @if (!Model.Canciones.Any())
 {
-    <p>Esta playlist está vacía.</p>
+    <p class="text-white">Esta playlist está vacía.</p>
 }
 else
 {
-    <table class="table table-striped mt-4">
+    <table class="table table-dark table-striped mt-4 rounded">
         <thead>
             <tr>
                 <th>Título</th>
@@ -46,10 +46,9 @@ else
                            asp-route-id="@s.Id"
                            asp-route-playlistId="@Model.Id"
                            asp-route-returnUrl="@Context.Request.Path"
-                           class="btn btn-sm btn-primary">
+                           class="btn btn-sm btn-success">
                             ▶︎
                         </a>
-
 
                         <form asp-action="RemoveSong"
                               asp-controller="Playlists"
@@ -63,11 +62,10 @@ else
                     </td>
                 </tr>
             }
-
         </tbody>
     </table>
 }
 
 <p class="mt-4">
-    <a asp-action="MisPlaylist" class="btn btn-outline-secondary">← Volver a ver Mis Playlist </a>
+    <a asp-action="MisPlaylist" class="btn btn-outline-light">← Volver a ver Mis Playlist</a>
 </p>

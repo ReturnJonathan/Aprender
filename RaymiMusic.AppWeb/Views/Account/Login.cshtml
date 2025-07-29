@@ -2,27 +2,70 @@
 @{
     ViewData["Title"] = "Iniciar sesión";
 }
-<h2>@ViewData["Title"]</h2>
 
-<form asp-action="Login" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<!-- Página de login estilo Spotify -->
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <!-- Card de login -->
+                <div class="card bg-dark text-white border-0 shadow-lg rounded-3">
+                    <div class="card-body p-5">
+                        <!-- Logo y título -->
+                        <div class="text-center mb-4">
+                            <h2 class="text-success fw-bold mb-2">🎵 RaymiMusic</h2>
+                            <h4 class="fw-bold mb-4">Iniciar sesión</h4>
+                        </div>
 
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+                        <!-- Formulario de login -->
+                        <form asp-action="Login" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-bold">Correo electrónico</label>
+                                <input asp-for="Email" class="form-control form-control-lg bg-dark text-white border-secondary rounded-3"
+                                       placeholder="tu@email.com" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Password" class="form-label fw-bold">Contraseña</label>
+                                <input asp-for="Password" type="password" class="form-control form-control-lg bg-dark text-white border-secondary rounded-3"
+                                       placeholder="Tu contraseña" />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold">
+                                    Iniciar sesión
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Enlaces adicionales -->
+                        <div class="text-center">
+                            <p class="text-white-50 mb-3">
+                                <a asp-action="ForgotPassword" class="text-success text-decoration-none">
+                                    ¿Olvidaste tu contraseña?
+                                </a>
+                            </p>
+                            <hr class="border-secondary my-4">
+                            <p class="text-white-50 mb-0">
+                                ¿No tienes cuenta?
+                                <a asp-action="Register" class="text-success text-decoration-none fw-bold">
+                                    Regístrate gratis
+                                </a>
+                            </p>
+                            <p class="text-white-50 mt-2">
+                                ¿Eres artista?
+                                <a asp-action="RegisterArtist" class="text-success text-decoration-none fw-bold">
+                                    Regístrate como artista
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Entrar</button>
-</form>
-
-<p>
-    ¿Olvidaste tu contraseña? <a asp-action="ForgotPassword">Recuperarla</a><br />
-    ¿No tienes cuenta? <a asp-action="Register">Regístrate</a>
-</p>
+</div>

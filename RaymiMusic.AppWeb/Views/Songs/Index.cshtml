@@ -1,40 +1,108 @@
 ﻿@model IEnumerable<RaymiMusic.Modelos.Cancion>
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Canciones";
 }
 
-<h2>@ViewData["Title"]</h2>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Nueva Canción</a>
-</p>
+<!-- Header con botón de nueva canción -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white fw-bold mb-0">
+        <i class="me-2">🎵</i> @ViewData["Title"]
+    </h1>
+    <a asp-action="Create" class="btn btn-success rounded-pill px-4">
+        <i class="me-1">➕</i> Nueva Canción
+    </a>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Título</th>
-            <th>Artista</th>
-            <th>Género</th>
-            <th>Álbum</th>
-            <th>Duración</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model)
-        {
-            <tr>
-                <td>@c.Titulo</td>
-                <td>@c.Artista?.NombreArtistico</td>
-                <td>@c.Genero?.Nombre</td>
-                <td>@c.Album?.Titulo</td>
-                <td>@c.Duracion</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@c.Id">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@c.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@c.Id">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+@if (!Model.Any())
+{
+    <!-- Estado vacío -->
+    <div class="card bg-dark text-white border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i style="font-size: 5rem; opacity: 0.5;">🎵</i>
+            <h3 class="mt-4 mb-3">No hay canciones disponibles</h3>
+            <p class="text-white-50 mb-4">Sube tu primera canción para comenzar</p>
+            <a asp-action="Create" class="btn btn-success rounded-pill px-4">
+                <i class="me-1">➕</i> Subir primera canción
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Lista de canciones estilo Spotify -->
+    <div class="card bg-dark text-white border-0 shadow-sm">
+        <div class="card-header bg-transparent border-bottom border-secondary">
+            <div class="row fw-bold text-white-50 small">
+                <div class="col-md-1 text-center">#</div>
+                <div class="col-md-3">TÍTULO</div>
+                <div class="col-md-2">ARTISTA</div>
+                <div class="col-md-2">GÉNERO</div>
+                <div class="col-md-2">ÁLBUM</div>
+                <div class="col-md-1">DURACIÓN</div>
+                <div class="col-md-1 text-end">ACCIONES</div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @{
+                int index = 1;
+            }
+            @foreach (var c in Model)
+            {
+                <div class="row align-items-center p-3 border-bottom border-secondary song-row">
+                    <div class="col-md-1 text-center">
+                        <span class="text-white-50 small">@index</span>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px; min-width: 40px;">
+                                <small>🎵</small>
+                            </div>
+                            <div class="text-truncate">
+                                <div class="fw-bold text-white">@c.Titulo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="text-white-50 text-truncate d-block">@c.Artista?.NombreArtistico</span>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="text-white-50 text-truncate d-block">@c.Genero?.Nombre</span>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="text-white-50 text-truncate d-block">@c.Album?.Titulo</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span class="text-white-50 small">@c.Duracion</span>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-link text-white-50 p-1" type="button" data-bs-toggle="dropdown">
+                                <i>⋯</i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a class="dropdown-item" asp-action="Details" asp-route-id="@c.Id">
+                                        <i class="me-2">👁️</i> Ver detalles
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-action="Edit" asp-route-id="@c.Id">
+                                        <i class="me-2">✏️</i> Editar
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@c.Id">
+                                        <i class="me-2">🗑️</i> Eliminar
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                index++;
+            }
+        </div>
+    </div>
+}

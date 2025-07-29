@@ -1,146 +1,262 @@
-﻿@using RaymiMusic.Modelos
-@using RaymiMusic.AppWeb.Models      @* Para Roles constants *@
+﻿@using RaymiMusic.AppWeb
+@using RaymiMusic.AppWeb.Models
+@using RaymiMusic.Modelos
+@{
+    // Calculamos aquí la clase del ícono y la etiqueta de rol
+    string iconClass = "fas fa-user text-success me-1";
+    string roleLabel = "Usuario";
+
+    if (User.IsInRole(Roles.Admin))
+    {
+        iconClass = "fas fa-crown text-warning me-1";
+        roleLabel = "Admin";
+    }
+    else if (User.IsInRole(Roles.Artista))
+    {
+        iconClass = "fas fa-microphone text-info me-1";
+        roleLabel = "Artista";
+    }
+    else if (User.IsInRole(Roles.Premium))
+    {
+        iconClass = "fas fa-star text-primary me-1";
+        roleLabel = "Premium";
+    }
+}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RaymiMusic.AppWeb</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - RaymiMusic</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RaymiMusic.AppWeb.styles.css" asp-append-version="true" />
-   
-
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RaymiMusic</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-                        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    <div class="d-flex vh-100">
+        <!-- SIDEBAR -->
+        <nav class="sidebar d-flex flex-column p-3 animate-slide-in bg-dark text-white">
+            <!-- Logo -->
+            <div class="sidebar-brand mb-4 text-center">
+                <h4 class="text-gradient fw-bold mb-0">
+                    <i class="fas fa-music me-2"></i>RaymiMusic
+                </h4>
+                <small class="text-light">Tu música, tu mundo</small>
+            </div>
 
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav me-auto mb-2 mb-sm-0">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+            <!-- Menú Principal -->
+            <ul class="nav nav-pills flex-column mb-4">
+                <li class="nav-item mb-1">
+                    <a class="nav-link text-white @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")"
+                    asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-home me-2"></i> Inicio
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link text-white" asp-controller="Home" asp-action="Privacy">
+                        <i class="fas fa-shield-alt me-2"></i> Privacidad
+                    </a>
+                </li>
+            </ul>
 
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            @* ARTISTA *@
-                            if (User.IsInRole(Roles.Artista))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Songs" asp-action="Index">Mis Canciones</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Albums" asp-action="Index">Mis Álbumes</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="PerfilArtista" asp-action="Index">Perfil</a>
-                                </li>
-                            }
-                            @* ADMIN *@
-                            else if (User.IsInRole(Roles.Admin))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Admin" asp-action="Index">Panel Admin</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Users" asp-action="Index">Usuarios</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Generos" asp-action="Index">Géneros</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Plans" asp-action="Index">Planes</a>
-                                </li>
-                            }
-                            @* USUARIO FREE O PREMIUM *@
-                            else
-                            {
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="dropdownPlaylists" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Playlists
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownPlaylists">
-                                        <li><a class="dropdown-item" asp-controller="Playlists" asp-action="MisPlaylist">Ver Mis Playlists</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Playlists" asp-action="PlaylistPublicas">Ver Playlists Públicas</a></li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="EditPerfilUsuario" asp-action="Index">Perfil</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="PlansUsuarios" asp-action="Planes">Cambiar A Un Plan</a>
-                                </li>
-                            }
+            <!-- Menú según rol -->
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="border-top border-secondary pt-3 mb-4">
+                    <h6 class="text-light text-uppercase small fw-bold mb-3 px-3">Tu biblioteca</h6>
 
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="nav-link btn btn-link p-0">Salir</button>
-                                </form>
+                    @if (User.IsInRole(Roles.Artista))
+                    {
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Songs" asp-action="Index">
+                                    <i class="fas fa-music me-2"></i> Mis Canciones
+                                </a>
                             </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register">Registro usuario</a>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Albums" asp-action="Index">
+                                    <i class="fas fa-compact-disc me-2"></i> Mis Álbumes
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="RegisterArtist">Registro artista</a>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="PerfilArtista" asp-action="Index">
+                                    <i class="fas fa-user-circle me-2"></i> Mi Perfil
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Ingresar</a>
+                            @{
+                                var artistaId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            }
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Dashboard" asp-action="Dashboard" asp-route-id = "@artistaId" asp-area="">
+                                    <i class="fas fa-chart-line me-2"></i> Dashboard
+                                </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="ForgotPassword">Olvidé contraseña</a>
+                        </ul>
+                    }
+                    else if (User.IsInRole(Roles.Admin))
+                    {
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="DashAdmin" asp-action="Index">
+                                    <i class="fas fa-tachometer-alt me-2"></i> Panel Admin
+                                </a>
                             </li>
-                        }
-                    </ul>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Users" asp-action="Index">
+                                    <i class="fas fa-users me-2"></i> Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Artistas" asp-action="Index">
+                                    <i class="fas fa-microphone me-2"></i> Artistas
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Generos" asp-action="Index">
+                                    <i class="fas fa-tags me-2"></i> Géneros
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Plans" asp-action="Index">
+                                    <i class="fas fa-crown me-2"></i> Planes
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="nav nav-pills flex-column">
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Playlists" asp-action="MisPlaylist">
+                                    <i class="bi bi-list-task"></i> Mis Playlists
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Playlists" asp-action="PlaylistPublicas">
+                                    <i class="fas fa-globe me-2"></i> Explorar Playlists
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="EditPerfilUsuario" asp-action="Index">
+                                    <i class="fas fa-user-edit me-2"></i> Mi Perfil
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="PlansUsuarios" asp-action="Planes">
+                                    <i class="fas fa-star me-2"></i> Cambiar Plan
+                                </a>
+                            </li>
+                            <li class="nav-item mb-1">
+                                <a class="nav-link text-white" asp-controller="Favoritos" asp-action="Index">
+                                    <i class="fas fa-crown me-2"></i> Ver Canciones Favoritas
+                                </a>
+                            </li>
+                        </ul>
+                    }
                 </div>
+            }
+
+            <!-- Info de usuario -->
+            <div class="mt-auto pt-3 border-top border-secondary">
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <div class="d-flex align-items-center mb-3 p-2 rounded bg-dark text-white border border-secondary">
+                        <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center me-3"
+                             style="width: 40px; height: 40px;">
+                            <i class="fas fa-user text-dark"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0 overflow-hidden">
+                            <div class="fw-bold text-truncate text-nowrap mb-1">@User.Identity.Name</div>
+                            <small class="text-light">
+                                <i class="@iconClass"></i> @roleLabel
+                            </small>
+                        </div>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-grid">
+                        <button type="submit" class="btn btn-outline-light btn-sm">
+                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-success" asp-controller="Account" asp-action="Register">
+                            <i class="fas fa-user-plus me-2"></i>Registro usuario
+                        </a>
+                        <a class="btn btn-outline-light" asp-controller="Account" asp-action="RegisterArtist">
+                            <i class="fas fa-user-edit me-2"></i>Registro artista
+                        </a>
+                        <a class="btn btn-outline-light" asp-controller="Account" asp-action="Login">
+                            <i class="fas fa-sign-in-alt me-2"></i>Ingresar
+                        </a>
+                    </div>
+                }
             </div>
         </nav>
 
-    </header>
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="flex-grow-1 d-flex flex-column">
+            <!-- HEADER OPCIONAL (puedes reusar el de tu layout “feo” si gustas) -->
+            <header class="navbar navbar-expand-lg navbar-dark bg-secondary px-3">
+                <span class="navbar-brand mb-0 h1">@ViewData["Title"]</span>
+            </header>
 
-    <div class="container">
-        @* Alertas globales *@
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        else if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
+            <!-- AQUI SE INYECTAN LAS VISTAS HIJAS -->
+            <main class="flex-grow-1 p-4 overflow-auto">
+                @RenderBody()
+            </main>
 
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            @* <!-- FOOTER (reproductor) -->
+            <footer class="music-player-footer bg-dark text-white py-2">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 d-none d-md-flex align-items-center">
+                            <i class="fas fa-music fa-2x me-3 text-muted"></i>
+                            <div>
+                                <div class="fw-bold text-truncate">Selecciona una canción</div>
+                                <small class="text-muted">para reproducir</small>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 text-center">
+                            <!-- controles -->
+                            <button class="btn btn-link text-light">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button class="btn btn-link text-light mx-2">
+                                <i class="fas fa-play fa-2x"></i>
+                            </button>
+                            <button class="btn btn-link text-light">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                        </div>
+                        <div class="col-md-3 d-none d-md-flex justify-content-end">
+                            <i class="fas fa-volume-up me-2"></i>
+                            <input type="range" min="0" max="100" value="70" />
+                        </div>
+                    </div>
+                </div>
+            </footer> *@
+        </div>
     </div>
 
-    
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     @await Html.PartialAsync("_ValidationScriptsPartial")
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

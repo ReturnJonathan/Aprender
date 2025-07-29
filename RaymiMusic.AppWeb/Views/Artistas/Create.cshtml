@@ -1,6 +1,6 @@
 ﻿@model Artista
 @{
-    ViewData["Title"] = "Editar Artista";
+    ViewData["Title"] = "Nuevo Artista";
 }
 
 <div class="animate-fade-in">
@@ -8,8 +8,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-action="Index" class="text-spotify-green">Artistas</a></li>
-            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id" class="text-spotify-green">@Model.NombreArtistico</a></li>
-            <li class="breadcrumb-item active">Editar</li>
+            <li class="breadcrumb-item active">Nuevo Artista</li>
         </ol>
     </nav>
 
@@ -18,45 +17,24 @@
             <div class="card shadow-lg">
                 <div class="card-header bg-gradient text-white">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-user-edit fa-2x me-3"></i>
+                        <i class="fas fa-user-plus fa-2x me-3"></i>
                         <div>
-                            <h3 class="mb-0 fw-bold">Editar Artista</h3>
-                            <p class="mb-0 opacity-75">Modifica la información de @Model.NombreArtistico</p>
+                            <h3 class="mb-0 fw-bold">Nuevo Artista</h3>
+                            <p class="mb-0 opacity-75">Agrega un nuevo artista a la plataforma</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-body p-4">
-                    <form asp-action="Edit" method="post" class="needs-validation" novalidate>
-                        <input type="hidden" asp-for="Id" />
+                    <form asp-action="Create" method="post" class="needs-validation" novalidate>
                         <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
-
-                        <!-- Información actual del artista -->
-                        <div class="alert alert-info mb-4">
-                            <div class="d-flex align-items-center">
-                                @if (!string.IsNullOrEmpty(Model.UrlFotoPerfil))
-                                {
-                                    <img src="@Model.UrlFotoPerfil" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="@Model.NombreArtistico">
-                                }
-                                else
-                                {
-                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                }
-                                <div>
-                                    <h6 class="mb-0">Editando: @Model.NombreArtistico</h6>
-                                    <small class="text-muted">ID: @Model.Id</small>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Nombre Artístico -->
                         <div class="mb-4">
                             <label asp-for="NombreArtistico" class="form-label fw-bold">
                                 <i class="fas fa-microphone me-2 text-spotify-green"></i>Nombre Artístico
                             </label>
-                            <input asp-for="NombreArtistico" class="form-control form-control-lg" required>
+                            <input asp-for="NombreArtistico" class="form-control form-control-lg" placeholder="Ingresa el nombre artístico" required>
                             <span asp-validation-for="NombreArtistico" class="text-danger small"></span>
                         </div>
 
@@ -77,6 +55,7 @@
                                 </label>
                                 <input asp-for="UrlFotoPerfil" class="form-control" placeholder="https://ejemplo.com/foto-perfil.jpg">
                                 <span asp-validation-for="UrlFotoPerfil" class="text-danger small"></span>
+                                <div class="form-text">URL de la imagen de perfil del artista</div>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label asp-for="UrlFotoPortada" class="form-label fw-bold">
@@ -84,6 +63,7 @@
                                 </label>
                                 <input asp-for="UrlFotoPortada" class="form-control" placeholder="https://ejemplo.com/portada.jpg">
                                 <span asp-validation-for="UrlFotoPortada" class="text-danger small"></span>
+                                <div class="form-text">URL de la imagen de portada del artista</div>
                             </div>
                         </div>
 
@@ -93,8 +73,8 @@
                                 <div class="preview-container">
                                     <label class="form-label fw-bold text-muted">Vista Previa - Perfil</label>
                                     <div class="border rounded p-3 text-center bg-light">
-                                        <img id="preview-perfil" src="@Model.UrlFotoPerfil" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; @(string.IsNullOrEmpty(Model.UrlFotoPerfil) ? "display: none;" : "")" alt="Vista previa perfil">
-                                        <div id="placeholder-perfil" class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; @(!string.IsNullOrEmpty(Model.UrlFotoPerfil) ? "display: none;" : "")">
+                                        <img id="preview-perfil" src="/placeholder.svg" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; display: none;" alt="Vista previa perfil">
+                                        <div id="placeholder-perfil" class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
                                             <i class="fas fa-user fa-2x text-white"></i>
                                         </div>
                                     </div>
@@ -104,8 +84,8 @@
                                 <div class="preview-container">
                                     <label class="form-label fw-bold text-muted">Vista Previa - Portada</label>
                                     <div class="border rounded p-3 text-center bg-light">
-                                        <img id="preview-portada" src="@Model.UrlFotoPortada" class="rounded" style="width: 200px; height: 120px; object-fit: cover; @(string.IsNullOrEmpty(Model.UrlFotoPortada) ? "display: none;" : "")" alt="Vista previa portada">
-                                        <div id="placeholder-portada" class="rounded bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 200px; height: 120px; @(!string.IsNullOrEmpty(Model.UrlFotoPortada) ? "display: none;" : "")">
+                                        <img id="preview-portada" src="/placeholder.svg" class="rounded" style="width: 200px; height: 120px; object-fit: cover; display: none;" alt="Vista previa portada">
+                                        <div id="placeholder-portada" class="rounded bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 200px; height: 120px;">
                                             <i class="fas fa-image fa-2x text-white"></i>
                                         </div>
                                     </div>
@@ -115,11 +95,11 @@
 
                         <!-- Botones de acción -->
                         <div class="d-flex gap-3 justify-content-end">
-                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-lg">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                                <i class="fas fa-save me-2"></i>Crear Artista
                             </button>
                         </div>
                     </form>
@@ -161,5 +141,22 @@
                 placeholder.style.display = 'inline-flex';
             }
         });
+
+        // Validación del formulario
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
     </script>
 }

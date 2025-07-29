@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using RaymiMusic.Api.Data;
 using RaymiMusic.Modelos;
 using RaymiMusic.AppWeb.Models;
+using System.Globalization;
 
 namespace RaymiMusic.AppWeb.Controllers
 {
@@ -75,9 +76,10 @@ namespace RaymiMusic.AppWeb.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CancionCreateVM vm)
         {
-            // Validar archivo
             if (vm.AudioFile == null || vm.AudioFile.Length == 0)
+            {
                 ModelState.AddModelError(nameof(vm.AudioFile), "Debes seleccionar un archivo de audio.");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -85,89 +87,122 @@ namespace RaymiMusic.AppWeb.Controllers
                 return View(vm);
             }
 
-            try
-            {
-                // Guardar archivo en wwwroot/uploads
-                var uploads = Path.Combine(_env.WebRootPath, "uploads");
-                Directory.CreateDirectory(uploads);
-
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.AudioFile.FileName)}";
-                var filePath = Path.Combine(uploads, fileName);
-                using var stream = System.IO.File.Create(filePath);
+            // Guardar archivo
+            var uploads = Path.Combine(_env.WebRootPath, "uploads");
+            Directory.CreateDirectory(uploads);
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.AudioFile.FileName)}";
+            var filePath = Path.Combine(uploads, fileName);
+            await using (var stream = System.IO.File.Create(filePath))
                 await vm.AudioFile.CopyToAsync(stream);
 
-                // Mapear a entidad Cancion
-                var entidad = new Cancion
-                {
-                    Id = Guid.NewGuid(),
-                    Titulo = vm.Titulo,
-                    Duracion = vm.Duracion,
-                    GeneroId = vm.GeneroId,
-                    AlbumId = vm.AlbumId,
-                    RutaArchivo = $"/uploads/{fileName}",
-                    ArtistaId = IsAdmin
-                        ? vm.ArtistaId!.Value
-                        : CurrentUserId
-                };
-
-                _ctx.Canciones.Add(entidad);
-                await _ctx.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
+            // Extraer duración
+            TimeSpan duracion;
+            try
             {
-                ModelState.AddModelError("", "Error al subir la canción: " + ex.Message);
+                var tfile = TagLib.File.Create(filePath);
+                duracion = tfile.Properties.Duration;
+            }
+            catch
+            {
+                ModelState.AddModelError("", "No se pudo leer la duración del MP3.");
                 await PopulateDropdowns();
                 return View(vm);
             }
+
+            // Persistir entidad
+            var entidad = new Cancion
+            {
+                Id = Guid.NewGuid(),
+                Titulo = vm.Titulo,
+                Duracion = duracion,
+                GeneroId = vm.GeneroId,
+                AlbumId = vm.AlbumId,
+                RutaArchivo = $"/uploads/{fileName}",
+                ArtistaId = IsAdmin
+                                ? vm.ArtistaId!.Value
+                                : CurrentUserId
+            };
+
+            _ctx.Canciones.Add(entidad);
+            await _ctx.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
+
 
         // GET: /Songs/Edit/{id}
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var c = await _ctx.Canciones.FindAsync(id);
-            if (c == null) return NotFound();
-            if (IsArtist && c.ArtistaId != CurrentUserId) return Forbid();
+            var entidad = await _ctx.Canciones.FindAsync(id);
+            if (entidad == null) return NotFound();
+            if (!IsAdmin && entidad.ArtistaId != CurrentUserId) return Forbid();
 
-            await PopulateDropdowns(c.ArtistaId);
-            return View(c);
+            await PopulateDropdowns(entidad.ArtistaId);
+
+            var vm = new CancionEditVM
+            {
+                Id = entidad.Id,
+                Titulo = entidad.Titulo,
+                GeneroId = entidad.GeneroId,
+                AlbumId = entidad.AlbumId,
+                ArtistaId = entidad.ArtistaId,
+                DuracionActual = entidad.Duracion
+            };
+            return View(vm);
         }
+
+
 
         // POST: /Songs/Edit/{id}
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            Guid id,
-            [Bind("Id,Titulo,Duracion,GeneroId,AlbumId,ArtistaId")] Cancion c,
-            IFormFile? audioFile)
+    Guid id,
+    CancionEditVM vm)
         {
-            if (id != c.Id) return BadRequest();
-            if (IsArtist && c.ArtistaId != CurrentUserId) return Forbid();
+            if (id != vm.Id)
+                return BadRequest();
 
-            // Si viene nuevo archivo, reemplazar
-            if (audioFile != null && audioFile.Length > 0)
+            var entidad = await _ctx.Canciones.FindAsync(id);
+            if (entidad == null)
+                return NotFound();
+            if (!IsAdmin && entidad.ArtistaId != CurrentUserId)
+                return Forbid();
+
+            // Si viene nuevo archivo, reemplazamos y recalculamos duración
+            if (vm.AudioFile is { Length: > 0 })
             {
                 var uploads = Path.Combine(_env.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploads);
-
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(audioFile.FileName)}";
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.AudioFile.FileName)}";
                 var filePath = Path.Combine(uploads, fileName);
-                using var stream = System.IO.File.Create(filePath);
-                await audioFile.CopyToAsync(stream);
-                c.RutaArchivo = $"/uploads/{fileName}";
+                await using var stream = System.IO.File.Create(filePath);
+                await vm.AudioFile.CopyToAsync(stream);
+
+                entidad.RutaArchivo = $"/uploads/{fileName}";
+                var tfile = TagLib.File.Create(filePath);
+                entidad.Duracion = tfile.Properties.Duration;
             }
 
+            // Validamos el resto de datos
             if (!ModelState.IsValid)
-                return await ReloadEditView(c);
+            {
+                await PopulateDropdowns(entidad.ArtistaId);
+                return View(vm);
+            }
 
-            if (IsArtist && !IsAdmin)
-                c.ArtistaId = CurrentUserId;
+            // Actualizamos metadatos
+            entidad.Titulo = vm.Titulo;
+            entidad.GeneroId = vm.GeneroId;
+            entidad.AlbumId = vm.AlbumId;
 
-            _ctx.Update(c);
             await _ctx.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+
+
+
 
         // GET: /Songs/Delete/{id}
         [HttpGet]

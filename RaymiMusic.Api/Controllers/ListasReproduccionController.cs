@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +28,14 @@ namespace RaymiMusic.Api.Controllers
                 .Include(l => l.Usuario)
                 .Include(l => l.CancionesEnListas)
                     .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Artista)
+                .Include(l => l.CancionesEnListas)
+                    .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Album)
                 .ToListAsync();
         }
+
+        // GET: api/ListasReproduccion/publicas
         [HttpGet("publicas")]
         public async Task<ActionResult<IEnumerable<ListaReproduccion>>> GetListasPublicas()
         {
@@ -37,8 +44,14 @@ namespace RaymiMusic.Api.Controllers
                 .Include(l => l.Usuario)
                 .Include(l => l.CancionesEnListas)
                     .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Artista)
+                .Include(l => l.CancionesEnListas)
+                    .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Album)
                 .ToListAsync();
         }
+
+        // GET: api/ListasReproduccion/usuario/{userId}
         [HttpGet("usuario/{userId:guid}")]
         public async Task<ActionResult<IEnumerable<ListaReproduccion>>> GetListasUsuario(Guid userId)
         {
@@ -47,8 +60,13 @@ namespace RaymiMusic.Api.Controllers
                 .Include(l => l.Usuario)
                 .Include(l => l.CancionesEnListas)
                     .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Artista)
+                .Include(l => l.CancionesEnListas)
+                    .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Album)
                 .ToListAsync();
         }
+
         // GET: api/ListasReproduccion/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<ListaReproduccion>> GetLista(Guid id)
@@ -57,9 +75,15 @@ namespace RaymiMusic.Api.Controllers
                 .Include(l => l.Usuario)
                 .Include(l => l.CancionesEnListas)
                     .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Artista)
+                .Include(l => l.CancionesEnListas)
+                    .ThenInclude(cl => cl.Cancion)
+                        .ThenInclude(c => c.Album)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
-            if (lista == null) return NotFound();
+            if (lista == null)
+                return NotFound();
+
             return lista;
         }
 
@@ -70,6 +94,7 @@ namespace RaymiMusic.Api.Controllers
             lista.Id = Guid.NewGuid();
             _context.ListasReproduccion.Add(lista);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetLista), new { id = lista.Id }, lista);
         }
 
@@ -86,8 +111,8 @@ namespace RaymiMusic.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                bool exists = await _context.ListasReproduccion.AnyAsync(l => l.Id == id);
-                if (!exists) return NotFound();
+                if (!await _context.ListasReproduccion.AnyAsync(l => l.Id == id))
+                    return NotFound();
                 throw;
             }
             return NoContent();
@@ -113,18 +138,17 @@ namespace RaymiMusic.Api.Controllers
             var cancion = await _context.Canciones.FindAsync(cancionId);
             if (lista == null || cancion == null) return NotFound();
 
-            var enlace = new CancionLista
+            _context.CancionesEnListas.Add(new CancionLista
             {
                 Id = Guid.NewGuid(),
                 ListaReproduccionId = listaId,
                 CancionId = cancionId
-            };
-            _context.CancionesEnListas.Add(enlace);
+            });
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE: api/ListasReproduccion/{listaId}/QuitarCancion/{cancionId}
+        // DELETE: api/ListasReproduccion/{listaId}/RemoveSong/{cancionId}
         [HttpDelete("{listaId:guid}/RemoveSong/{cancionId:guid}")]
         public async Task<IActionResult> RemoveSong(Guid listaId, Guid cancionId)
         {

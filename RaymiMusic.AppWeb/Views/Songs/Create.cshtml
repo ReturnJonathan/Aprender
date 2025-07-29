@@ -1,13 +1,7 @@
 ﻿@model RaymiMusic.AppWeb.Models.CancionCreateVM
-@using Microsoft.AspNetCore.Mvc.Rendering
-
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Nueva Canción";
-    bool isAdmin = User.IsInRole(Roles.Admin);
 }
-
-<h2>@ViewData["Title"]</h2>
 
 <form asp-action="Create" method="post" enctype="multipart/form-data">
     <div asp-validation-summary="All" class="text-danger mb-3"></div>
@@ -25,53 +19,35 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="Duracion" class="form-label"></label>
-        <input asp-for="Duracion" class="form-control" placeholder="hh:mm:ss" />
-        <span asp-validation-for="Duracion" class="text-danger"></span>
-        <div class="form-text">Formato ejemplo: 00:03:30</div>
-    </div>
-
-    <div class="mb-3">
         <label asp-for="GeneroId" class="form-label">Género</label>
-        <select asp-for="GeneroId" class="form-select"
-                asp-items='@(ViewData["Generos"] as SelectList)'>
+        <select asp-for="GeneroId" class="form-select" asp-items="@(ViewData["Generos"] as SelectList)">
             <option value="">-- seleccionar --</option>
         </select>
-
         <span asp-validation-for="GeneroId" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="AlbumId" class="form-label">Álbum (opcional)</label>
-        <select asp-for="AlbumId" class="form-select"
-                asp-items='@(ViewData["Albums"] as SelectList)'>
+        <select asp-for="AlbumId" class="form-select" asp-items="@(ViewData["Albums"] as SelectList)">
             <option value="">-- ninguno --</option>
         </select>
-        <span asp-validation-for="AlbumId" class="text-danger"></span>
     </div>
 
-    @if (isAdmin)
+    @if (User.IsInRole(Roles.Admin))
     {
         <div class="mb-3">
             <label asp-for="ArtistaId" class="form-label">Artista</label>
-            <select asp-for="ArtistaId" class="form-select"
-                    asp-items='@(ViewData["Artistas"] as SelectList)'>
+            <select asp-for="ArtistaId" class="form-select" asp-items="@(ViewData["Artistas"] as SelectList)">
                 <option value="">-- seleccionar --</option>
             </select>
-
             <span asp-validation-for="ArtistaId" class="text-danger"></span>
         </div>
     }
     else
     {
-        @* Para que el binder reciba ArtistaId aunque el artista no vea el dropdown *@
         <input type="hidden" asp-for="ArtistaId" />
     }
 
     <button type="submit" class="btn btn-success">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
-
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial")
-}

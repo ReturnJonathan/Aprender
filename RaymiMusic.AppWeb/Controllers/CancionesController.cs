@@ -1,18 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RaymiMusic.Api.Data;
+using RaymiMusic.AppWeb.Services;
 using RaymiMusic.Modelos;       // ← contiene Cancion, Artista, Genero y RaymiMusicContext
 using System.IO;
+using System.Security.Claims;
 
 namespace RaymiMusic.AppWeb.Controllers
 {
+
     public class CancionesController : Controller
     {
         private readonly AppDbContext _ctx;
-
-        public CancionesController(AppDbContext ctx) => _ctx = ctx;
-
+        private readonly IPlanesService _planesService;
+        public CancionesController(AppDbContext ctx,IPlanesService planesService)
+        {
+            _ctx = ctx;
+            _planesService = planesService;
+        }
         /*------------------------------------------------------------------
          * LISTADO
          *----------------------------------------------------------------*/
@@ -101,7 +108,7 @@ namespace RaymiMusic.AppWeb.Controllers
             var cancion = await _ctx.Canciones.FindAsync(id);
             if (cancion == null) return NotFound();
 
-            SetDropDowns(cancion.ArtistaId, cancion.GeneroId);
+            SetDropDowns(cancion.ArtistaId, cancion.GeneroId, cancion.AlbumId);
             return View(cancion);
         }
 
@@ -109,7 +116,7 @@ namespace RaymiMusic.AppWeb.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             Guid id,
-            [Bind("Id,Titulo,Duracion,ArtistaId,GeneroId")] Cancion cancion,
+            [Bind("Id,Titulo,Duracion,ArtistaId,GeneroId,AlbumId")] Cancion cancion,
             IFormFile? nuevoArchivo)  // Campo para subir un nuevo archivo (opcional)
         {
             if (id != cancion.Id) return NotFound();
@@ -159,6 +166,7 @@ namespace RaymiMusic.AppWeb.Controllers
             entidad.Duracion = cancion.Duracion;
             entidad.ArtistaId = cancion.ArtistaId;
             entidad.GeneroId = cancion.GeneroId;
+            entidad.AlbumId = cancion.AlbumId;
 
             _ctx.Update(entidad);
             await _ctx.SaveChangesAsync();
@@ -198,7 +206,6 @@ namespace RaymiMusic.AppWeb.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-
         // GET: /Canciones/Descargar/{id}
         [HttpGet]
         public async Task<IActionResult> Descargar(Guid id)
@@ -206,6 +213,23 @@ namespace RaymiMusic.AppWeb.Controllers
             var cancion = await _ctx.Canciones.FindAsync(id);
             if (cancion == null)
                 return NotFound();
+
+            if (!User.Identity.IsAuthenticated)
+                return RedirectToAction("Login", "Account");
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return NotFound();
+
+            var plan = await _planesService.ObtenerPlanUsuarioAsync(Guid.Parse(userId));
+
+            if (plan?.Nombre == "Free")
+            {
+                
+                return RedirectToAction("Error", "Player", new { message = "Debes tener un plan Premium para descargar canciones." });
+
+
+
+            }
 
             // REGISTRAR DESCARGA usando la API
             using var client = new HttpClient();
@@ -231,16 +255,20 @@ namespace RaymiMusic.AppWeb.Controllers
 
             var mime = "audio/mpeg";
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            return File(fileStream, mime, Path.GetFileName(filePath));
+            string safeTitulo = string.Concat(cancion.Titulo.Split(Path.GetInvalidFileNameChars()));
+            return File(fileStream, mime, $"{safeTitulo}.mp3");
+
+           // return File(fileStream, mime, Path.GetFileName(filePath));
         }
 
         /*------------------------------------------------------------------
          * HELPER: combos desplegables
          *----------------------------------------------------------------*/
-        private void SetDropDowns(Guid? artistaId = null, Guid? generoId = null)
+        private void SetDropDowns(Guid? artistaId = null, Guid? generoId = null, Guid? albumId = null)
         {
             ViewBag.Artistas = new SelectList(_ctx.Artistas, "Id", "NombreArtistico", artistaId);
             ViewBag.Generos = new SelectList(_ctx.Generos, "Id", "Nombre", generoId);
+            ViewBag.Albums = new SelectList(_ctx.Albumes, "Id", "Titulo", albumId);
         }
     }
 }

@@ -10,5 +10,6 @@ namespace RaymiMusic.AppWeb.Models
 
         public IEnumerable<SongDTO> Songs { get; set; }
         public IEnumerable<Album> Albums { get; set; } = new List<Album>();
+
     }
 }

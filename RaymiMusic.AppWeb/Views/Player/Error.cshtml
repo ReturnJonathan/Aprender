@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Plan Requerido";
+}
+
+@{
+    Layout = "_Layout";  // Referencia al Layout actual
+}
+
+<!-- Contenedor principal -->
+<div class="container py-5">
+    <div class="card mx-auto" style="max-width: 600px;">
+        <div class="card-body text-center">
+            <h2 class="mb-4">Acceso Requerido</h2>
+
+            <!-- Mensaje de restricción -->
+            <div class="alert alert-danger" role="alert">
+                <strong>¡Atención!</strong> Para poder descargar una canción, debes ser un usuario Premium.
+                <br> ¡No te preocupes! <strong>Vea nuestros planes</strong> y obtén acceso ahora.
+            </div>
+
+            <!-- Botones para Ver Planes y Volver -->
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-controller="PlansUsuarios" asp-action="Planes">Vea Nuestros Planes</a>
+                <a href="javascript:history.back()">Atrás</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/reproductor.js"></script>  <!-- Si tienes un script que usar -->
+}

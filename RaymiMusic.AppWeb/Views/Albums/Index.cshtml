@@ -7,45 +7,103 @@
     bool isArtist = User.IsInRole(Roles.Artista);
 }
 
-<h2>@ViewData["Title"]</h2>
+<!-- Header con botón de nuevo álbum -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white fw-bold mb-0">
+        <i class="me-2">💿</i> @ViewData["Title"]
+    </h1>
+    @if (isAdmin || isArtist)
+    {
+        <a asp-action="Create" class="btn btn-success rounded-pill px-4">
+            <i class="me-1">➕</i> Nuevo Álbum
+        </a>
+    }
+</div>
 
-@if (isAdmin || isArtist)
+@if (!Model.Any())
 {
-    <p><a asp-action="Create" class="btn btn-primary">Nuevo álbum</a></p>
+    <!-- Estado vacío -->
+    <div class="card bg-dark text-white border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i style="font-size: 5rem; opacity: 0.5;">💿</i>
+            <h3 class="mt-4 mb-3">No hay álbumes disponibles</h3>
+            <p class="text-white-50 mb-4">Crea tu primer álbum para organizar tus canciones</p>
+            @if (isAdmin || isArtist)
+            {
+                <a asp-action="Create" class="btn btn-success rounded-pill px-4">
+                    <i class="me-1">➕</i> Crear primer álbum
+                </a>
+            }
+        </div>
+    </div>
 }
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Título</th>
-            <th>Fecha lanzamiento</th>
-            <th>Artista</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+else
+{
+    <!-- Grid de álbumes -->
+    <div class="row g-4">
         @foreach (var alb in Model)
         {
-            <tr>
-                <td>@alb.Titulo</td>
-                <td>
-                    @(
-                        alb.FechaLanzamiento.HasValue
-                        ? alb.FechaLanzamiento.Value.ToString("yyyy-MM-dd")
-                        : "—"
-                        )
-                </td>
-                <td>@alb.Artista.NombreArtistico</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@alb.Id" class="btn btn-link">Ver</a>
-                    @if (isAdmin
-                   || (isArtist && alb.ArtistaId.ToString() == userId))
-                    {
-                        <a asp-action="Edit" asp-route-id="@alb.Id" class="btn btn-link">Editar</a>
-                        <a asp-action="Delete" asp-route-id="@alb.Id" class="btn btn-link text-danger">Eliminar</a>
-                    }
-                </td>
-            </tr>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="card bg-dark text-white h-100 shadow-sm border-0 album-card">
+                    <div class="position-relative">
+                        @if (!string.IsNullOrEmpty(alb.NombreArchivoPortada))
+                        {
+                            <img src="/media/portadas/@alb.NombreArchivoPortada"
+                                 class="card-img-top img-fluid"
+                                 alt="Portada de @alb.Titulo"
+                                 style="height: 200px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i style="font-size: 3rem; opacity: 0.5;">💿</i>
+                            </div>
+                        }
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-dark bg-opacity-75 rounded-pill">💿</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-truncate mb-2">@alb.Titulo</h5>
+                        <p class="card-text text-white-50 small mb-2">
+                            <i class="me-1">👤</i> @alb.Artista.NombreArtistico
+                        </p>
+                        <p class="card-text text-white-50 small mb-3">
+                            <i class="me-1">📅</i>
+                            @(alb.FechaLanzamiento.HasValue ? alb.FechaLanzamiento.Value.ToString("yyyy") : "—")
+                        </p>
+
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@alb.Id"
+                               class="btn btn-outline-success btn-sm rounded-pill flex-fill">
+                                <i class="me-1">👁️</i> Ver
+                            </a>
+                            @if (isAdmin || (isArtist && alb.ArtistaId.ToString() == userId))
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
+                                        <i>⋯</i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@alb.Id">
+                                                <i class="me-2">✏️</i> Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@alb.Id">
+                                                <i class="me-2">🗑️</i> Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+}

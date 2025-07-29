@@ -1,22 +1,234 @@
 ﻿@model Artista
 @{
-    ViewData["Title"] = "Detalle artista";
-}
-<h2>@Model.NombreArtistico</h2>
-
-@if (!string.IsNullOrWhiteSpace(Model.UrlFotoPortada))
-{
-    <img src="@Model.UrlFotoPortada" style="max-width:600px;" class="mb-3" />
+    ViewData["Title"] = Model.NombreArtistico;
 }
 
-@if (!string.IsNullOrWhiteSpace(Model.UrlFotoPerfil))
-{
-    <img src="@Model.UrlFotoPerfil" style="max-width:200px;" class="rounded-circle mb-3" />
-}
+<div class="animate-fade-in">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-dark rounded px-3 py-2">
+            <li class="breadcrumb-item">
+                <a asp-action="Index" class="text-spotify-green">Artistas</a>
+            </li>
+            <li class="breadcrumb-item active text-white">@Model.NombreArtistico</li>
+        </ol>
+    </nav>
 
-<p><strong>Biografía:</strong> @Model.Biografia</p>
+    <!-- Header del artista con imagen de portada -->
+    <div class="position-relative mb-5 rounded-3 overflow-hidden shadow-xl">
+        @if (!string.IsNullOrEmpty(Model.UrlFotoPortada))
+        {
+            <div class="position-relative" style="height:400px; background:linear-gradient(45deg, rgba(0,0,0,0.7), rgba(29,185,84,0.3)), url('@Model.UrlFotoPortada') center/cover;">
+                <div class="position-absolute bottom-0 start-0 p-5 text-white">
+                    <div class="d-flex align-items-end">
+                        @if (!string.IsNullOrEmpty(Model.UrlFotoPerfil))
+                        {
+                            <img src="@Model.UrlFotoPerfil" class="rounded-circle shadow-lg me-4"
+                                 style="width:150px;height:150px;object-fit:cover;border:4px solid white;"
+                                 alt="@Model.NombreArtistico" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-gradient shadow-lg me-4 d-flex align-items-center justify-content-center"
+                                 style="width:150px;height:150px;border:4px solid white;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                        }
+                        <div>
+                            <p class="mb-2 text-uppercase fw-bold small text-white opacity-75">
+                                <i class="fas fa-microphone me-2"></i>Artista
+                            </p>
+                            <h1 class="display-3 fw-black mb-3 text-glow text-white">@Model.NombreArtistico</h1>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-light text-dark px-3 py-2">
+                                    <i class="fas fa-music me-1"></i>@(ViewBag.CantidadCanciones ?? 0) canciones
+                                </span>
+                                <span class="badge bg-light text-dark px-3 py-2">
+                                    <i class="fas fa-compact-disc me-1"></i>@(ViewBag.CantidadAlbumes ?? 0) álbumes
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-gradient p-5 text-white" style="height:400px;">
+                <div class="d-flex align-items-end h-100">
+                    <div class="rounded-circle bg-dark bg-opacity-25 shadow-lg me-4 d-flex align-items-center justify-content-center"
+                         style="width:150px;height:150px;">
+                        <i class="fas fa-user fa-4x text-white"></i>
+                    </div>
+                    <div>
+                        <p class="mb-2 text-uppercase fw-bold small text-white opacity-75">
+                            <i class="fas fa-microphone me-2"></i>Artista
+                        </p>
+                        <h1 class="display-3 fw-black mb-3 text-glow text-white">@Model.NombreArtistico</h1>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-light text-dark px-3 py-2">
+                                <i class="fas fa-music me-1"></i>@(ViewBag.CantidadCanciones ?? 0) canciones
+                            </span>
+                            <span class="badge bg-light text-dark px-3 py-2">
+                                <i class="fas fa-compact-disc me-1"></i>@(ViewBag.CantidadAlbumes ?? 0) álbumes
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 
-<p>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-</p>
+    <!-- Canciones populares -->
+    <div class="card glass-effect mb-4 bg-dark border-0">
+        <div class="card-header bg-transparent border-bottom-0 py-3">
+            <h5 class="mb-0 fw-bold text-white">
+                <i class="fas fa-fire me-2 text-spotify-green"></i>Canciones Populares
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Canciones?.Any() == true)
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var cancion in Model.Canciones.Take(5))
+                    {
+                        <div class="list-group-item bg-dark text-white border-secondary d-flex align-items-center">
+                            <a asp-controller="Player"
+                               asp-action="Play"
+                               asp-route-id="@cancion.Id"
+                               class="btn btn-success btn-sm rounded-circle me-3"
+                               style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;"
+                               title="Reproducir @cancion.Titulo">
+                                <i class="fas fa-play"></i>
+                            </a>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold text-white text-truncate">@cancion.Titulo</h6>
+                                <small class="text-white">@cancion.Duracion.ToString(@"mm\:ss")</small>
+                            </div>
+                            <div class="text-white">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (Model.Canciones.Count > 5)
+                {
+                    <div class="card-footer bg-dark border-secondary text-center py-3">
+                        <button class="btn btn-outline-success">Ver todas las canciones (@Model.Canciones.Count)</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center p-5">
+                    <i class="fas fa-music fa-3x text-muted mb-3"></i>
+                    <p class="text-white">Este artista aún no tiene canciones</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Álbumes -->
+    <div class="card glass-effect mb-4 bg-dark border-0">
+        <div class="card-header bg-transparent py-3">
+            <h5 class="mb-0 fw-bold text-white">
+                <i class="fas fa-compact-disc me-2 text-spotify-green"></i>Álbumes
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Albumes?.Any() == true)
+            {
+                <div class="row">
+                    @foreach (var album in Model.Albumes.Take(4))
+                    {
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card album-card h-100 bg-dark text-white border-0">
+                                <div class="bg-secondary d-flex align-items-center justify-content-center" style="height:150px;">
+                                    <i class="fas fa-compact-disc fa-3x text-white opacity-50"></i>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="card-title fw-bold mb-1 text-white">@album.Titulo</h6>
+                                    <small class="text-white">@album.FechaLanzamiento?.Year</small>
+                                </div>
+                                <a asp-controller="Player"
+                                   asp-action="Play"
+                                   asp-route-id="@album.Canciones.First().Id"
+                                   asp-route-albumId="@album.Id"
+                                   class="play-button btn-sm position-absolute bottom-2 end-2 btn-success"
+                                   title="Reproducir @album.Titulo">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-4">
+                    <i class="fas fa-compact-disc fa-3x text-muted mb-3"></i>
+                    <p class="text-white">Este artista aún no tiene álbumes</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="row">
+        <div class="col-lg-4">
+            <!-- Estadísticas -->
+            <div class="card glass-effect mb-4 bg-dark border-0">
+                <div class="card-header bg-transparent py-2">
+                    <h6 class="mb-0 fw-bold text-white">
+                        <i class="fas fa-chart-bar me-2 text-spotify-green"></i>Estadísticas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="mb-2"><i class="fas fa-music fa-2x text-info"></i></div>
+                            <h4 class="fw-bold text-white">@(ViewBag.CantidadCanciones ?? 0)</h4>
+                            <small class="text-white">Canciones</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2"><i class="fas fa-compact-disc fa-2x text-warning"></i></div>
+                            <h4 class="fw-bold text-white">@(ViewBag.CantidadAlbumes ?? 0)</h4>
+                            <small class="text-white">Álbumes</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2"><i class="fas fa-eye fa-2x text-success"></i></div>
+                            <h4 class="fw-bold text-white">0</h4>
+                            <small class="text-white">Visitas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del perfil -->
+            <div class="card glass-effect bg-dark border-0">
+                <div class="card-header bg-transparent py-2">
+                    <h6 class="mb-0 fw-bold text-white">
+                        <i class="fas fa-info-circle me-2 text-spotify-green"></i>Información
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong class="text-white">ID del Artista:</strong>
+                        <p class="mb-0 font-monospace small text-white">@Model.Id</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong class="text-white">Nombre Artístico:</strong>
+                        <p class="mb-0 text-white">@Model.NombreArtistico</p>
+                    </div>
+                    @if (Model.Canciones?.Any() == true)
+                    {
+                        <div class="mb-3">
+                            <strong class="text-white">Última Canción:</strong>
+                            <p class="mb-0 text-white">@Model.Canciones.LastOrDefault()?.Titulo</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

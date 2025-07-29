@@ -2,28 +2,169 @@
 @{
     ViewData["Title"] = "Artistas";
 }
-<h2>Artistas</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">+ Nuevo artista</a>
-</p>
+<div class="animate-fade-in">
+    <!-- Header con gradiente -->
+    <div class="bg-gradient text-white p-5 rounded-3 mb-4 position-relative overflow-hidden">
+        <div class="position-relative z-index-1">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="display-4 fw-bold mb-2 text-glow">
+                        <i class="fas fa-microphone me-3"></i>Artistas
+                    </h1>
+                    <p class="lead mb-0 opacity-75">Descubre y gestiona todos los artistas de la plataforma</p>
+                </div>
+                <a asp-action="Create" class="btn btn-light btn-lg shadow-lg">
+                    <i class="fas fa-plus me-2"></i>Nuevo Artista
+                </a>
+            </div>
+        </div>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr><th>Nombre artístico</th><th>Bio</th><th></th></tr>
-    </thead>
-    <tbody>
-        @foreach (var a in Model)
-        {
-            <tr>
-                <td>@a.NombreArtistico</td>
-                <td>@a.Biografia?.Substring(0, Math.Min(60, a.Biografia.Length)) …</td>
-                <td class="text-end">
-                    <a asp-action="Details" asp-route-id="@a.Id">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@a.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@a.Id">Borrar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x text-spotify-green mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count()</h3>
+                    <p class="text-muted mb-0">Total Artistas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-music fa-2x text-info mb-3"></i>
+                    <h3 class="fw-bold">@Model.Sum(a => a.Canciones?.Count ?? 0)</h3>
+                    <p class="text-muted mb-0">Canciones Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-compact-disc fa-2x text-warning mb-3"></i>
+                    <h3 class="fw-bold">@Model.Sum(a => a.Albumes?.Count ?? 0)</h3>
+                    <p class="text-muted mb-0">Álbumes Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count(a => !string.IsNullOrEmpty(a.Biografia))</h3>
+                    <p class="text-muted mb-0">Con Biografía</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de artistas -->
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var artista in Model)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card artist-card h-100 shadow-lg">
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(artista.UrlFotoPortada))
+                            {
+                                <img src="@artista.UrlFotoPortada" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@artista.NombreArtistico">
+                            }
+                            else
+                            {
+                                <div class="bg-gradient d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-music fa-4x text-white opacity-50"></i>
+                                </div>
+                            }
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <div class="dropdown">
+                                    <button class="btn btn-dark btn-sm rounded-circle" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Details" asp-route-id="@artista.Id">
+                                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@artista.Id">
+                                                <i class="fas fa-edit me-2"></i>Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@artista.Id">
+                                                <i class="fas fa-trash me-2"></i>Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                @if (!string.IsNullOrEmpty(artista.UrlFotoPerfil))
+                                {
+                                    <img src="@artista.UrlFotoPerfil" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="@artista.NombreArtistico">
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                }
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1 fw-bold">@artista.NombreArtistico</h5>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-music me-1"></i>
+                                        @(artista.Canciones?.Count ?? 0) canciones
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(artista.Biografia))
+                            {
+                                <p class="card-text text-muted small">
+                                    @(artista.Biografia.Length > 100 ? artista.Biografia.Substring(0, 100) + "..." : artista.Biografia)
+                                </p>
+                            }
+
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-compact-disc me-1"></i>
+                                        @(artista.Albumes?.Count ?? 0) álbumes
+                                    </span>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-music me-1"></i>
+                                        @(artista.Canciones?.Count ?? 0) canciones
+                                    </span>
+                                </div>
+                                <a asp-action="Details" asp-route-id="@artista.Id" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state text-center">
+            <i class="fas fa-microphone-slash fa-5x text-muted mb-4"></i>
+            <h3 class="text-muted">No hay artistas registrados</h3>
+            <p class="text-muted">Comienza agregando el primer artista a la plataforma</p>
+            <a asp-action="Create" class="btn btn-success btn-lg mt-3">
+                <i class="fas fa-plus me-2"></i>Agregar Primer Artista
+            </a>
+        </div>
+    }
+</div>

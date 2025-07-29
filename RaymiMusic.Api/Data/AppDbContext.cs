@@ -21,11 +21,10 @@ namespace RaymiMusic.Api.Data
         public DbSet<RaymiMusic.Modelos.HistorialReproducciones> HistorialReproducciones { get; set; } = default!;
         public DbSet<Descarga> Descargas { get; set; }
         public DbSet<CancionAlbum> CancionAlbum { get; set; }
-
-
         public DbSet<EmailConfirmation> EmailConfirmations { get; set; }
         public DbSet<RaymiMusic.Modelos.Follow> Follow { get; set; } = default!;
         public DbSet<RaymiMusic.Modelos.Pago> Pago { get; set; } = default!;
 
+        public DbSet<RaymiMusic.Modelos.LikeCancion> LikeCancion { get; set; }
     }
 }

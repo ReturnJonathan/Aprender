@@ -38,7 +38,7 @@ namespace RaymiMusic.AppWeb.Services
             );
             return Map(filtradas);
         }
-     
+
 
         private IEnumerable<SongDTO> Map(IEnumerable<Cancion>? lista)
         {
@@ -70,6 +70,47 @@ namespace RaymiMusic.AppWeb.Services
                 ArtistaNombre = c.Artista?.NombreArtistico ?? "—"
             };
         }
+        public async Task DeleteLike(Guid idLike)
+        {
+            var response = await _http.DeleteAsync($"api/LikesCanciones/{idLike}");
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar el error según sea necesario (lanzar excepción, registrar, etc.)
+                throw new Exception("Error al eliminar el Like");
+            }
 
+
+        }
+        public async Task CreateLikeAsync(LikeCancion like)
+        {
+            var response = await _http.PostAsJsonAsync("api/LikesCanciones", like);
+
+            if (!response.IsSuccessStatusCode)
+            {
+
+                throw new Exception("Error al crear el Like");
+            }
+
+        }
+
+        public async Task<LikeCancion?> GetSongLike(Guid idUsuario, Guid idCancion)
+        {
+            try
+            {
+                // GET /api/LikesCanciones/{idUsuario}/{idCancion}
+                return await _http.GetFromJsonAsync<LikeCancion>($"api/LikesCanciones/usuario/{idUsuario}/cancion/{idCancion}");
+            }
+            catch (Exception ex)
+            {
+                // Si no se encuentra el Like, devolver null o manejar el error
+                return null;
+
+            }
+        }
+
+        public Task<IEnumerable<LikeCancion>> GetLikesForUser(Guid userId)
+        {
+            return _http.GetFromJsonAsync<IEnumerable<LikeCancion>>($"api/LikesCanciones/usuario/{userId}");
+        }
     }
 }

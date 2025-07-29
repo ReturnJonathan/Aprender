@@ -6,35 +6,154 @@
     ViewData["Title"] = "Editar usuario";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="animate-fade-in">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-spotify-green">Usuarios</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id" class="text-spotify-green">@Model.Correo</a></li>
+            <li class="breadcrumb-item active">Editar</li>
+        </ol>
+    </nav>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-user-edit fa-2x me-3"></i>
+                        <div>
+                            <h3 class="mb-0 fw-bold">Editar Usuario</h3>
+                            <p class="mb-0 opacity-75">Modifica la información de @Model.Correo</p>
+                        </div>
+                    </div>
+                </div>
 
-    <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="card-body p-4">
+                    <!-- Información actual del usuario -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(Model.UrlFotoPerfil))
+                            {
+                                <img src="~/media/usuarios/@Model.UrlFotoPerfil" class="rounded-circle me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="@Model.Correo">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            }
+                            <div>
+                                <h6 class="mb-0">Editando: @Model.Correo</h6>
+                                <small class="text-muted">Rol actual: @Model.Rol</small>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="mb-3">
-        <label asp-for="Correo" class="form-label"></label>
-        <input asp-for="Correo" class="form-control" />
+                    <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Email -->
+                        <div class="mb-4">
+                            <label asp-for="Correo" class="form-label fw-bold">
+                                <i class="fas fa-envelope me-2 text-spotify-green"></i>Correo Electrónico
+                            </label>
+                            <input asp-for="Correo" type="email" class="form-control form-control-lg" required>
+                            <span asp-validation-for="Correo" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Contraseña -->
+                        <div class="mb-4">
+                            <label asp-for="HashContrasena" class="form-label fw-bold">
+                                <i class="fas fa-lock me-2 text-spotify-green"></i>Contraseña (Hash)
+                            </label>
+                            <input asp-for="HashContrasena" class="form-control form-control-lg" required>
+                            <span asp-validation-for="HashContrasena" class="text-danger small"></span>
+                            <div class="form-text">Deja este campo como está si no quieres cambiar la contraseña</div>
+                        </div>
+
+                        <!-- Rol -->
+                        <div class="mb-4">
+                            <label asp-for="Rol" class="form-label fw-bold">
+                                <i class="fas fa-user-tag me-2 text-spotify-green"></i>Rol
+                            </label>
+                            <select asp-for="Rol" class="form-select form-select-lg">
+                                <option value="Free">Usuario Free</option>
+                                <option value="Premium">Usuario Premium</option>
+                                <option value="@Roles.Artista">Artista</option>
+                                <option value="@Roles.Admin">Administrador</option>
+                            </select>
+                            <span asp-validation-for="Rol" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Plan de suscripción -->
+                        <div class="mb-4">
+                            <label asp-for="PlanSuscripcionId" class="form-label fw-bold">
+                                <i class="fas fa-crown me-2 text-spotify-green"></i>Plan de Suscripción
+                            </label>
+                            <select asp-for="PlanSuscripcionId"
+                                    class="form-select form-select-lg"
+                                    asp-items="@(ViewData["Planes"] as SelectList)">
+                                <option value="">-- Seleccionar plan --</option>
+                            </select>
+                            <span asp-validation-for="PlanSuscripcionId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Foto de perfil -->
+                        <div class="mb-4">
+                            <label asp-for="UrlFotoPerfil" class="form-label fw-bold">
+                                <i class="fas fa-image me-2 text-spotify-green"></i>Foto de Perfil (URL)
+                            </label>
+                            <input asp-for="UrlFotoPerfil" class="form-control">
+                            <span asp-validation-for="UrlFotoPerfil" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Vista previa de imagen -->
+                        <div class="mb-4">
+                            <div class="preview-container">
+                                <label class="form-label fw-bold text-muted">Vista Previa</label>
+                                <div class="border rounded p-3 text-center bg-light">
+                                    <img id="preview-perfil" src="@Model.UrlFotoPerfil" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover; @(string.IsNullOrEmpty(Model.UrlFotoPerfil) ? "display: none;" : "")" alt="Vista previa">
+                                    <div id="placeholder-perfil" class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; @(!string.IsNullOrEmpty(Model.UrlFotoPerfil) ? "display: none;" : "")">
+                                        <i class="fas fa-user fa-2x text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label asp-for="HashContrasena" class="form-label">Contraseña (hash)</label>
-        <input asp-for="HashContrasena" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="Rol" class="form-label"></label>
-        <input asp-for="Rol" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label asp-for="PlanSuscripcionId" class="form-label">Plan</label>
-        <select asp-for="PlanSuscripcionId"
-                class="form-select"
-                asp-items="@(ViewData["Planes"] as SelectList)">
-            <option value="">-- seleccionar --</option>
-        </select>
+</div>
 
-    </div>
+@section Scripts {
+    <script>
+        // Vista previa de imagen
+        document.getElementById('UrlFotoPerfil').addEventListener('input', function() {
+            const url = this.value;
+            const preview = document.getElementById('preview-perfil');
+            const placeholder = document.getElementById('placeholder-perfil');
 
-    <button type="submit" class="btn btn-success">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.style.display = 'none';
+                placeholder.style.display = 'inline-flex';
+            }
+        });
+    </script>
+}

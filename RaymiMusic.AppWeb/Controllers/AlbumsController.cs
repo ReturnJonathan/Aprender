@@ -46,15 +46,27 @@ namespace RaymiMusic.AppWeb.Controllers
         // GET: /Albums/Details/{id}
         public async Task<IActionResult> Details(Guid id)
         {
+            // Cargo el álbum y el artista
             var album = await _ctx.Albumes
                                   .Include(a => a.Artista)
-                                  .Include(a => a.CancionesAlbum)  // Incluye las canciones del álbum
-                                  .ThenInclude(ca => ca.Cancion)  // Incluye las canciones
                                   .FirstOrDefaultAsync(a => a.Id == id);
 
-            if (album == null) return NotFound();
-            return View(album);  // Redirige a la vista de detalles del álbum
+            if (album == null)
+                return NotFound();
+
+            // Traigo todas las canciones que tengan este AlbumId
+            var canciones = await _ctx.Canciones
+                                      .Where(c => c.AlbumId == id)
+                                      .OrderBy(c => c.Id)
+                                      .ToListAsync();
+
+            // Le asigno la lista al álbum para que la vista la consuma
+            album.Canciones = canciones;
+
+            return View(album);
         }
+
+
 
         // GET: /Albums/Create
         public IActionResult Create()

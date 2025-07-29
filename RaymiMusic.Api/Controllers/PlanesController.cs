@@ -105,6 +105,18 @@ namespace RaymiMusic.Api.Controllers
             var usuario = await _context.Usuarios.FindAsync(userId);
             if (usuario == null) throw new Exception("Usuario no encontrado");
             usuario.PlanSuscripcion = plan;
+            if (usuario.Rol == "Artista" || usuario.Rol == "Admin")
+            {
+                return; // No cambiar el rol de artistas o admins
+            }
+            if (plan.Nombre == "Free")
+            {
+                usuario.Rol = "free";
+            }
+            if (plan.Nombre != "Free")
+            {
+                usuario.Rol = "premium";
+            }
             await _context.SaveChangesAsync();
 
         }

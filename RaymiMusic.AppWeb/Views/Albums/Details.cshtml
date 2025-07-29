@@ -1,47 +1,181 @@
 ﻿@model Album
 
+@using System.Security.Claims
+@using RaymiMusic.AppWeb.Models
 @{
     ViewData["Title"] = "Detalle de álbum";
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     bool isAdmin = User.IsInRole(Roles.Admin);
     bool isArtist = User.IsInRole(Roles.Artista);
+    int trackNumber = 1;
 }
 
-<h2>@ViewData["Title"]</h2>
+<!-- Header del álbum estilo Spotify -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient text-white shadow-xl rounded-4 overflow-hidden">
+            <div class="card-body p-5">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        @if (!string.IsNullOrEmpty(Model.NombreArchivoPortada))
+                        {
+                            <img src="/media/portadas/@Model.NombreArchivoPortada"
+                                 alt="Portada de @Model.Titulo"
+                                 class="img-fluid rounded-3 shadow-xl"
+                                 style="max-width: 300px; max-height: 300px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="bg-dark bg-opacity-50 rounded-3 shadow-xl d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 300px; height: 300px;">
+                                <i class="fas fa-compact-disc fa-5x text-white opacity-50"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <span class="badge bg-dark bg-opacity-50 rounded-pill px-3 py-2">
+                                <i class="fas fa-compact-disc me-2"></i>ÁLBUM
+                            </span>
+                        </div>
+                        <h1 class="display-4 fw-black mb-3 text-glow">@Model.Titulo</h1>
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                     style="width: 32px; height: 32px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <span class="fw-bold">@Model.Artista.NombreArtistico</span>
+                            </div>
+                            @if (Model.FechaLanzamiento.HasValue)
+                            {
+                                <span class="text-white-75">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @Model.FechaLanzamiento.Value.ToString("yyyy")
+                                </span>
+                            }
+                        </div>
 
-@if (!string.IsNullOrEmpty(Model.NombreArchivoPortada))
+                        <!-- Acciones del álbum -->
+                        <div class="d-flex gap-3 align-items-center">
+                            @if (Model.Canciones != null && Model.Canciones.Any())
+                            {
+                                <a asp-controller="Player" asp-action="Play"
+                                   asp-route-id="@Model.Canciones.First().Id"
+                                   class="btn btn-success btn-lg rounded-pill px-4">
+                                    <i class="fas fa-play me-2"></i>Reproducir
+                                </a>
+                            }
+
+                            @if (isAdmin || (isArtist && Model.ArtistaId.ToString() == userId))
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-light btn-lg rounded-pill dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@Model.Id">
+                                                <i class="fas fa-edit me-2"></i>Editar álbum
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@Model.Id">
+                                                <i class="fas fa-trash me-2"></i>Eliminar álbum
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+
+                            <button class="btn btn-outline-light btn-lg rounded-circle">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de canciones del álbum -->
+@if (Model.Canciones != null && Model.Canciones.Any())
 {
-    <div class="mb-4">
-        <img src="/media/portadas/@Model.NombreArchivoPortada"
-             alt="Portada del álbum"
-             style="width: 250px; height: 250px; object-fit: cover; border-radius: 15px;" />
+    <div class="card bg-dark text-white border-0 shadow-lg">
+        <div class="card-header bg-transparent border-bottom border-secondary">
+            <div class="row fw-bold text-muted small text-uppercase">
+                <div class="col-1 text-center">#</div>
+                <div class="col-6">Título</div>
+                <div class="col-3">Duración</div>
+                <div class="col-2 text-end">Acciones</div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @foreach (var cancion in Model.Canciones.OrderBy(c => c.Id))
+            {
+                <div class="row align-items-center p-3 border-bottom border-secondary song-row">
+                    <div class="col-1 text-center">
+                        <span class="text-muted small fw-bold">@trackNumber</span>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-gradient rounded me-3 d-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-music text-dark"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-white">@cancion.Titulo</div>
+                                <small class="text-muted">@Model.Artista.NombreArtistico</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <span class="text-muted">@cancion.Duracion</span>
+                    </div>
+                    <div class="col-2 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a asp-controller="Player" asp-action="Play" asp-route-id="@cancion.Id"
+                               class="btn btn-success btn-sm rounded-circle"
+                               style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-play" style="font-size: 0.7rem;"></i>
+                            </a>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-muted p-1" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Playlists" asp-action="AddSong" asp-route-songId="@cancion.Id">
+                                            <i class="fas fa-plus me-2"></i>Agregar a playlist
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                trackNumber++; 
+            }
+        </div>
     </div>
 }
 else
 {
-    <div class="mb-4 text-muted">Este álbum no tiene una portada asignada.</div>
+    <div class="card bg-dark text-white border-0 shadow-lg">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-music fa-4x text-muted mb-4"></i>
+            <h4 class="mb-3">Este álbum está vacío</h4>
+            <p class="text-muted">No hay canciones en este álbum aún.</p>
+        </div>
+    </div>
 }
 
-<dl class="row">
-    <dt class="col-sm-2">Título</dt>
-    <dd class="col-sm-10">@Model.Titulo</dd>
-
-    <dt class="col-sm-2">Fecha lanzamiento</dt>
-    <dd class="col-sm-10">
-        @(Model.FechaLanzamiento.HasValue
-            ? Model.FechaLanzamiento.Value.ToString("yyyy-MM-dd")
-            : "—")
-    </dd>
-
-    <dt class="col-sm-2">Artista</dt>
-    <dd class="col-sm-10">@Model.Artista.NombreArtistico</dd>
-</dl>
-
-<p>
-    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-    @if (isAdmin || (isArtist && Model.ArtistaId.ToString() == userId))
-    {
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
-        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Eliminar</a>
-    }
-</p>
+<!-- Botón de navegación -->
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-outline-light rounded-pill px-4">
+        <i class="fas fa-arrow-left me-2"></i>Volver a álbumes
+    </a>
+</div>

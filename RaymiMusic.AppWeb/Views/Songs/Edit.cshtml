@@ -1,17 +1,15 @@
-﻿@model RaymiMusic.Modelos.Cancion
+﻿@model RaymiMusic.AppWeb.Models.CancionEditVM
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Editar Canción";
-    bool isAdmin = User.IsInRole(Roles.Admin);
 }
 
 <h2>@ViewData["Title"]</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
-    <div asp-validation-summary="All" class="text-danger"></div>
 
     <div class="mb-3">
         <label asp-for="Titulo" class="form-label"></label>
@@ -19,13 +17,13 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="RutaArchivo" class="form-label">URL / Ruta</label>
-        <input asp-for="RutaArchivo" class="form-control" />
+        <label class="form-label">Duración actual</label>
+        <p class="form-control-plaintext">@Model.DuracionActual</p>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Duracion" class="form-label"></label>
-        <input asp-for="Duracion" class="form-control" />
+        <label asp-for="AudioFile" class="form-label">Reemplazar archivo (opcional)</label>
+        <input asp-for="AudioFile" type="file" class="form-control" accept="audio/*" />
     </div>
 
     <div class="mb-3">
@@ -42,7 +40,7 @@
         </select>
     </div>
 
-    @if (isAdmin)
+    @if (User.IsInRole(Roles.Admin))
     {
         <div class="mb-3">
             <label asp-for="ArtistaId" class="form-label">Artista</label>
@@ -50,6 +48,10 @@
                 <option value="">-- seleccionar --</option>
             </select>
         </div>
+    }
+    else
+    {
+        <input type="hidden" asp-for="ArtistaId" />
     }
 
     <button type="submit" class="btn btn-success">Guardar</button>

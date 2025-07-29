@@ -4,28 +4,123 @@
     ViewData["Title"] = "Géneros";
 }
 
-<h2>@ViewData["Title"]</h2>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Nuevo Género</a>
-</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var g in Model)
-        {
-            <tr>
-                <td>@g.Nombre</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@g.Id">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@g.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@g.Id">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="animate-fade-in">
+    <!-- Header con gradiente -->
+    <div class="bg-gradient text-white p-5 rounded-3 mb-4 position-relative overflow-hidden">
+        <div class="position-relative z-index-1">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="display-4 fw-bold mb-2 text-glow">
+                        <i class="fas fa-tags me-3"></i>Géneros Musicales
+                    </h1>
+                    <p class="lead mb-0 opacity-75">Organiza y gestiona todos los géneros de música</p>
+                </div>
+                <a asp-action="Create" class="btn btn-light btn-lg shadow-lg">
+                    <i class="fas fa-plus me-2"></i>Nuevo Género
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags fa-2x text-spotify-green mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count()</h3>
+                    <p class="text-muted mb-0">Total Géneros</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-music fa-2x text-info mb-3"></i>
+                    <h3 class="fw-bold">@Model.Sum(g => g.Canciones?.Count ?? 0)</h3>
+                    <p class="text-muted mb-0">Canciones Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-fire fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">@(Model.Any() ? Model.OrderByDescending(g => g.Canciones?.Count ?? 0).First().Nombre : "N/A")</h3>
+                    <p class="text-muted mb-0">Más Popular</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de géneros -->
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var genero in Model)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card genre-card h-100 shadow-lg">
+                        <div class="position-relative">
+                            <div class="genre-header bg-gradient d-flex align-items-center justify-content-center" style="height: 150px;">
+                                <i class="fas fa-music fa-4x text-white opacity-75"></i>
+                            </div>
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <div class="dropdown">
+                                    <button class="btn btn-dark btn-sm rounded-circle" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Details" asp-route-id="@genero.Id">
+                                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@genero.Id">
+                                                <i class="fas fa-edit me-2"></i>Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@genero.Id">
+                                                <i class="fas fa-trash me-2"></i>Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-2">@genero.Nombre</h5>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-music me-1"></i>
+                                        @(genero.Canciones?.Count ?? 0) canciones
+                                    </span>
+                                </div>
+                                <a asp-action="Details" asp-route-id="@genero.Id" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state text-center">
+            <i class="fas fa-tags fa-5x text-muted mb-4"></i>
+            <h3 class="text-muted">No hay géneros registrados</h3>
+            <p class="text-muted">Comienza agregando el primer género musical</p>
+            <a asp-action="Create" class="btn btn-success btn-lg mt-3">
+                <i class="fas fa-plus me-2"></i>Agregar Primer Género
+            </a>
+        </div>
+    }
+</div>

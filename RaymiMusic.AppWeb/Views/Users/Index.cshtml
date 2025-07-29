@@ -1,35 +1,190 @@
-﻿@model IEnumerable<RaymiMusic.Modelos.Usuario>
+﻿@model IEnumerable<Usuario>
 @{
-    Layout = "_Layout";
     ViewData["Title"] = "Usuarios";
 }
 
-<h2>@ViewData["Title"]</h2>
-<p>
-    <a asp-action="Create" class="btn btn-primary">Nuevo Usuario</a>
-</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th>Plan</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var u in Model)
-        {
-            <tr>
-                <td>@u.Correo</td>
-                <td>@u.Rol</td>
-                <td>@u.PlanSuscripcion.Nombre</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@u.Id">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@u.Id">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@u.Id">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="animate-fade-in">
+    <!-- Header con gradiente -->
+    <div class="bg-gradient text-white p-5 rounded-3 mb-4 position-relative overflow-hidden">
+        <div class="position-relative z-index-1">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="display-4 fw-bold mb-2 text-glow">
+                        <i class="fas fa-users me-3"></i>Usuarios
+                    </h1>
+                    <p class="lead mb-0 opacity-75">Gestiona todos los usuarios de la plataforma</p>
+                </div>
+                <a asp-action="Create" class="btn btn-light btn-lg shadow-lg">
+                    <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x text-spotify-green mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count()</h3>
+                    <p class="text-muted mb-0">Total Usuarios</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-microphone fa-2x text-info mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count(u => u.Rol == Roles.Artista)</h3>
+                    <p class="text-muted mb-0">Artistas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-crown fa-2x text-warning mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count(u => u.Rol == "Premium")</h3>
+                    <p class="text-muted mb-0">Premium</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card glass-effect h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-2x text-danger mb-3"></i>
+                    <h3 class="fw-bold">@Model.Count(u => u.Rol == Roles.Admin)</h3>
+                    <p class="text-muted mb-0">Administradores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de usuarios -->
+    @if (Model.Any())
+    {
+        <div class="card glass-effect bg-dark text-white mb-4">
+            <div class="card-header text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Lista de Usuarios
+                    </h5>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Plan</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var usuario in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(usuario.UrlFotoPerfil))
+                                            {
+                                                <img src="~/media/usuarios/@usuario.UrlFotoPerfil"
+                                                     class="rounded-circle me-3"
+                                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                                     alt="Usuario" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center me-3"
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user text-white"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="fw-bold text-truncate" style="max-width: 200px;">
+                                                    @usuario.Correo
+                                                </div>
+                                                <small class="text-muted">
+                                                    ID: @usuario.Id.ToString().Substring(0, 8)...
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">@usuario.Correo</td>
+                                    <td class="align-middle">
+                                        @if (usuario.Rol == Roles.Admin)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-user-shield me-1"></i>Administrador
+                                            </span>
+                                        }
+                                        else if (usuario.Rol == Roles.Artista)
+                                        {
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-microphone me-1"></i>Artista
+                                            </span>
+                                        }
+                                        else if (usuario.Rol == "Premium")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-crown me-1"></i>Premium
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-user me-1"></i>Free
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        @if (usuario.PlanSuscripcion != null)
+                                        {
+                                            <span class="badge bg-success">
+                                                @usuario.PlanSuscripcion.Nombre
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Sin plan</span>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex gap-1">
+                                            <a asp-action="Details" asp-route-id="@usuario.Id"
+                                               class="btn btn-outline-info btn-sm" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@usuario.Id"
+                                               class="btn btn-outline-warning btn-sm" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@usuario.Id"
+                                               class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state text-center">
+            <i class="fas fa-user-slash fa-5x text-muted mb-4"></i>
+            <h3 class="text-muted">No hay usuarios registrados</h3>
+            <p class="text-muted">
+                Los usuarios aparecerán aquí cuando se registren en la plataforma
+            </p>
+        </div>
+    }
+</div>

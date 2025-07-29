@@ -18,13 +18,18 @@ else
     <ul class="list-group">
         @foreach (var pl in Model)
         {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a asp-action="DetailsByUserPersonal" asp-route-id="@pl.Id">@pl.Nombre</a>
+            <li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                <a asp-action="DetailsByUserPersonal"
+                   asp-route-id="@pl.Id"
+                   class="text-white">
+                    @pl.Nombre
+                </a>
                 <span class="badge bg-secondary">
-                    @(pl.CancionesEnListas != null ? pl.CancionesEnListas.Count : 0)
-                    </span>
+                    @(pl.CancionesEnListas?.Count ?? 0)
+                </span>
             </li>
         }
+
     </ul>
 }
 <p class="mt-4">

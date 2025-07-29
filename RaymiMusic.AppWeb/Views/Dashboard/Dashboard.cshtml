@@ -1,26 +1,31 @@
 ﻿@model ArtistDashboardVM
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Dashboard del Artista";
 }
 
-<h2 class="text-center mb-4">Panel de @Model.NombreArtista</h2>
+<h2 class="text-center mb-4 text-white">Panel de @Model.NombreArtista</h2>
 
 <!-- Totales del artista -->
 <div class="d-flex justify-content-around text-center mb-5">
-    <div class="card p-4 shadow rounded" style="width: 200px;">
-        <h5>Canciones</h5>
-        <h2>@Model.TotalCanciones</h2>
+    <div class="card bg-dark text-white shadow rounded" style="width: 200px;">
+        <div class="card-body">
+            <h5 class="card-title">Canciones</h5>
+            <h2 class="card-text">@Model.TotalCanciones</h2>
+        </div>
     </div>
-    <div class="card p-4 shadow rounded" style="width: 200px;">
-        <h5>Álbumes</h5>
-        <h2>@Model.TotalAlbumes</h2>
+    <div class="card bg-dark text-white shadow rounded" style="width: 200px;">
+        <div class="card-body">
+            <h5 class="card-title">Álbumes</h5>
+            <h2 class="card-text">@Model.TotalAlbumes</h2>
+        </div>
     </div>
 </div>
 
 <!-- Últimas Canciones -->
-<h4 class="mt-4">Últimas Canciones</h4>
-<table class="table table-hover">
-    <thead class="thead-dark">
+<h4 class="mt-4 text-white">Últimas Canciones</h4>
+<table class="table table-hover table-dark">
+    <thead class="bg-secondary text-white">
         <tr>
             <th>Título</th>
             <th>Duración</th>
@@ -38,47 +43,60 @@
 </table>
 
 <!-- Verificación de Descargas -->
-<h4 class="mt-5">Verificación Manual de Descargas</h4>
-@if (Model.CancionesConDescargas != null && Model.CancionesConDescargas.Any())
+<h4 class="mt-5 text-white">Verificación Manual de Descargas</h4>
+@if (Model.CancionesConDescargas?.Any() == true)
 {
-    <ul>
+    <ul class="list-group list-group-flush">
         @foreach (var item in Model.CancionesConDescargas)
         {
-            <li>@item.Titulo - Descargas: @item.TotalDescargas</li>
+            <li class="list-group-item bg-dark text-white border-0">
+                @item.Titulo — Descargas: @item.TotalDescargas
+            </li>
         }
+
     </ul>
 }
 else
 {
-    <p>No hay descargas registradas para tus canciones.</p>
+    <p class="text-white-50">No hay descargas registradas para tus canciones.</p>
 }
 
 <!-- Gráficas -->
 <div class="row mt-5">
-    <div class="col-md-4">
-        <h5 class="text-center">Descargas por Canción</h5>
-        <canvas id="descargasChart"></canvas>
+    <div class="col-md-4 mb-4">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h5 class="card-title text-center">Descargas por Canción</h5>
+                <canvas id="descargasChart"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h5 class="text-center">Reproducciones por Canción</h5>
-        <canvas id="reproduccionesChart"></canvas>
+    <div class="col-md-4 mb-4">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h5 class="card-title text-center">Reproducciones por Canción</h5>
+                <canvas id="reproduccionesChart"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h5 class="text-center">Canciones y Albums Totales</h5>
-        <canvas id="totalesChart"></canvas>
+    <div class="col-md-4 mb-4">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h5 class="card-title text-center">Canciones y Álbumes Totales</h5>
+                <canvas id="totalesChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         window.descargaLabels = @Html.Raw(Json.Serialize(Model.CancionesConDescargas.Select(c => c.Titulo)));
-        window.descargaData = @Html.Raw(Json.Serialize(Model.CancionesConDescargas.Select(c => c.TotalDescargas)));
-        window.repsLabels = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.Titulo)));
-        window.repsData = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.TotalReproducciones)));
-        window.totalData = @Html.Raw(Json.Serialize(new int[] { Model.TotalCanciones, Model.TotalAlbumes }));
+        window.descargaData   = @Html.Raw(Json.Serialize(Model.CancionesConDescargas.Select(c => c.TotalDescargas)));
+        window.repsLabels      = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.Titulo)));
+        window.repsData        = @Html.Raw(Json.Serialize(Model.CancionesConReproducciones.Select(c => c.TotalReproducciones)));
+        window.totalData       = @Html.Raw(Json.Serialize(new int[] { Model.TotalCanciones, Model.TotalAlbumes }));
     </script>
-
     <script src="~/js/dashboard.js"></script>
 }

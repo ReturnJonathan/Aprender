@@ -83,7 +83,8 @@ namespace RaymiMusic.AppWeb.Controllers
                 int totalDescargas = 0;
                 try
                 {
-                    var response = await client.GetAsync($"/api/Descargas/total/{c.Id}");
+                    var response = await client.GetAsync($"api/Descargas/total/{c.Id}");
+
                     if (response.IsSuccessStatusCode)
                     {
                         var str = await response.Content.ReadAsStringAsync();

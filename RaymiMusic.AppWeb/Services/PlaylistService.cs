@@ -16,27 +16,36 @@ public class PlaylistService : IPlaylistService
 
     public async Task<PlaylistDetailsVM?> GetByIdAsync(Guid id)
     {
-        // 1) Trae el objeto ListaReproduccion bruto
-        var lista = await _http.GetFromJsonAsync<ListaReproduccion>($"api/ListasReproduccion/{id}");
-        if (lista == null) return null;
+        // 1) Consumimos la playlist completa con Artista y Album incluidos
+        var lista = await _http
+           .GetFromJsonAsync<ListaReproduccion>($"api/ListasReproduccion/{id}");
 
-        // 2) Proyecta a PlaylistDetailsVM
-        return new PlaylistDetailsVM
+        if (lista == null)
+            return null;
+
+        // 2) Mapeamos a PlaylistDetailsVM
+        var vm = new PlaylistDetailsVM
         {
             Id = lista.Id,
             Nombre = lista.Nombre,
             EsPublica = lista.EsPublica,
-            Canciones = lista.CancionesEnListas.Select(cl => new SongDTO
-            {
-                Id = cl.Cancion.Id,
-                Titulo = cl.Cancion.Titulo,
-                AlbumNombre = cl.Cancion.Album?.Titulo ?? "—",
-                ArtistaNombre = cl.Cancion.Artista?.NombreArtistico ?? "—",
-                Duracion = cl.Cancion.Duracion,
-                RutaArchivo = cl.Cancion.RutaArchivo
-            })
+            Canciones = lista.CancionesEnListas.Select(cl => {
+                var c = cl.Cancion!;
+                return new SongDTO
+                {
+                    Id = c.Id,
+                    Titulo = c.Titulo,
+                    ArtistaNombre = c.Artista?.NombreArtistico ?? "—",
+                    AlbumNombre = c.Album?.Titulo ?? "—",
+                    Duracion = c.Duracion,
+                    RutaArchivo = c.RutaArchivo
+                };
+            }).ToList()
         };
+
+        return vm;
     }
+
     public async Task<IEnumerable<ListaReproduccion>> GetListasUsuario(Guid userId)
     {
         // GET /api/ListasReproduccion/Usuario/{usuarioId}

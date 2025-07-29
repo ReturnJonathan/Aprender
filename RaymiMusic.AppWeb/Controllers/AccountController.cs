@@ -185,7 +185,7 @@ namespace RaymiMusic.AppWeb.Controllers
                 case "premium":
                     return RedirectToAction("Index", "Home");
                 case "admin":
-                    return RedirectToAction("");
+                    return RedirectToAction("Index", "Home");
                 default:
                     return RedirectToAction("Index", "Home");
             }

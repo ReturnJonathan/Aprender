@@ -4,56 +4,162 @@
     ViewData["Title"] = Model.Nombre;
 }
 
-<h1>@Model.Nombre</h1>
-<p>
-    @if (Model.EsPublica)
-    {
-        <span class="badge bg-info">Pública</span>
-    }
-    else
-    {
-        <span class="badge bg-secondary">Privada</span>
-    }
-</p>
+<!-- Header de la playlist estilo Spotify -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient text-white shadow-xl rounded-4 overflow-hidden">
+            <div class="card-body p-5">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <div class="bg-white bg-opacity-20 rounded-3 shadow-xl d-flex align-items-center justify-content-center mx-auto"
+                             style="width: 200px; height: 200px;">
+                            <i class="fas fa-list-music fa-4x text-white"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="mb-3">
+                            <span class="badge bg-dark bg-opacity-50 rounded-pill px-3 py-2">
+                                <i class="fas fa-list-music me-2"></i>PLAYLIST
+                            </span>
+                        </div>
+                        <h1 class="display-4 fw-black mb-3 text-glow">@Model.Nombre</h1>
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            @if (Model.EsPublica)
+                            {
+                                <span class="badge bg-success rounded-pill px-3 py-2">
+                                    <i class="fas fa-globe me-1"></i>Pública
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                    <i class="fas fa-lock me-1"></i>Privada
+                                </span>
+                            }
+                            <span class="text-white-75">@Model.Canciones.Count() canciones</span>
+                        </div>
+
+                        <!-- Acciones de la playlist -->
+                        <div class="d-flex gap-3 align-items-center">
+                            @if (Model.Canciones.Any())
+                            {
+                                <a asp-controller="Player" asp-action="Play"
+                                   asp-route-id="@Model.Canciones.First().Id"
+                                   asp-route-playlistId="@Model.Id"
+                                   class="btn btn-success btn-lg rounded-pill px-4">
+                                    <i class="fas fa-play me-2"></i>Reproducir
+                                </a>
+                                <button class="btn btn-outline-light btn-lg rounded-pill">
+                                    <i class="fas fa-random me-2"></i>Aleatorio
+                                </button>
+                            }
+                            <button class="btn btn-outline-light btn-lg rounded-circle">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-light btn-lg rounded-circle dropdown-toggle"
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-share me-2"></i>Compartir
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-download me-2"></i>Descargar
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @if (!Model.Canciones.Any())
 {
-    <p>Esta playlist está vacía.</p>
+    <!-- Estado vacío -->
+    <div class="card bg-dark text-white border-0 shadow-lg">
+        <div class="card-body text-center py-5 empty-state">
+            <i class="fas fa-list-music fa-4x text-muted mb-4"></i>
+            <h4 class="mb-3">Esta playlist está vacía</h4>
+            <p class="text-muted mb-4">Busca canciones y artistas que te gusten</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success rounded-pill px-4">
+                <i class="fas fa-search me-2"></i>Buscar música
+            </a>
+        </div>
+    </div>
 }
 else
 {
-    <table class="table table-striped mt-4">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Artista</th>
-                <th>Álbum</th>
-                <th>Duración</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Lista de canciones -->
+    <div class="card bg-dark text-white border-0 shadow-lg">
+        <div class="card-header bg-transparent border-bottom border-secondary">
+            <div class="row fw-bold text-muted small text-uppercase">
+                <div class="col-1 text-center">#</div>
+                <div class="col-4">Título</div>
+                <div class="col-2">Artista</div>
+                <div class="col-2">Álbum</div>
+                <div class="col-2">Duración</div>
+                <div class="col-1 text-end">Acciones</div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @{
+                int index = 1;
+            }
             @foreach (var s in Model.Canciones)
             {
-                <tr>
-                    <td>@s.Titulo</td>
-                    <td>@s.ArtistaNombre</td>
-                    <td>@s.AlbumNombre</td>
-                    <td>@s.Duracion.ToString(@"mm\:ss")</td>
-                    <td>
+                <div class="row align-items-center p-3 border-bottom border-secondary song-row">
+                    <div class="col-1 text-center">
+                        <span class="text-muted small fw-bold">@index</span>
+                    </div>
+                    <div class="col-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-gradient rounded me-3 d-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-music text-dark"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="fw-bold text-white text-truncate">@s.Titulo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <span class="text-muted text-truncate d-block">@s.ArtistaNombre</span>
+                    </div>
+                    <div class="col-2">
+                        <span class="text-muted text-truncate d-block">@s.AlbumNombre</span>
+                    </div>
+                    <div class="col-2">
+                        <span class="text-muted">@s.Duracion.ToString(@"mm\:ss")</span>
+                    </div>
+                    <div class="col-1 text-end">
                         <a asp-controller="Player"
                            asp-action="Play"
                            asp-route-id="@s.Id"
-                           class="btn btn-sm btn-primary">
-                            ▶︎
+                           asp-route-playlistId="@Model.Id"
+                           class="btn btn-success btn-sm rounded-circle"
+                           style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-play" style="font-size: 0.7rem;"></i>
                         </a>
-                    </td>
-                </tr>
+                    </div>
+                </div>
+                index++; 
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 }
 
-<p class="mt-4">
-    <a asp-action="Index" class="btn btn-outline-secondary">← Volver a mis playlists</a>
-</p>
+<!-- Botón de navegación -->
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-outline-light rounded-pill px-4">
+        <i class="fas fa-arrow-left me-2"></i>Volver a playlists
+    </a>
+</div>

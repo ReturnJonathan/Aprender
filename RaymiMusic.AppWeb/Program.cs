@@ -95,78 +95,78 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 // —– Seed automático del plan “Free” —–
-//using (var scope = app.Services.CreateScope())
-//{
-//    var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-//    // Ojo: tu DbSet se llama 'Planes' y la clase es PlanSuscripcion
-//    if (!ctx.Planes.Any(p => p.Nombre == "Free"))
-//    {
-//        ctx.Planes.Add(new PlanSuscripcion
-//        {
-//            Id = Guid.NewGuid(),
-//            Nombre = "Free",
-//            Precio = 0m,
-//            DescargasMaximas = 0
-//        });
-//        ctx.SaveChanges();
-//    }
-//}
+    // Ojo: tu DbSet se llama 'Planes' y la clase es PlanSuscripcion
+    if (!ctx.Planes.Any(p => p.Nombre == "Free"))
+    {
+        ctx.Planes.Add(new PlanSuscripcion
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Free",
+            Precio = 0m,
+            DescargasMaximas = 0
+        });
+        ctx.SaveChanges();
+    }
+}
 
 
-// —— Seed automático del plan “Free” ——
-//using (var scope = app.Services.CreateScope())
-//{
-//    var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+ //—— Seed automático del plan “Free” ——
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-//    // — Seed plan Free —
-//    if (!ctx.Planes.Any(p => p.Nombre == "Free"))
-//    {
-//        ctx.Planes.Add(new PlanSuscripcion
-//        {
-//            Id = Guid.NewGuid(),
-//            Nombre = "Free",
-//            Precio = 0m,
-//            DescargasMaximas = 0
-//        });
-//        ctx.SaveChanges();
-//    }
+    // — Seed plan Free —
+    if (!ctx.Planes.Any(p => p.Nombre == "Free"))
+    {
+        ctx.Planes.Add(new PlanSuscripcion
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Free",
+            Precio = 0m,
+            DescargasMaximas = 0
+        });
+        ctx.SaveChanges();
+    }
 
-//    // — Seed admin y confírmalo automáticamente —
-//    if (!ctx.Usuarios.Any(u => u.Correo == "admin@admin.com"))
-//    {
-//        var freeId = ctx.Planes.First(p => p.Nombre == "Free").Id;
-//        var adminId = Guid.NewGuid();
+    // — Seed admin y confírmalo automáticamente —
+    if (!ctx.Usuarios.Any(u => u.Correo == "admin@admin.com"))
+    {
+        var freeId = ctx.Planes.First(p => p.Nombre == "Free").Id;
+        var adminId = Guid.NewGuid();
 
-//        // 1) Crear admin
-//        ctx.Usuarios.Add(new Usuario
-//        {
-//            Id = adminId,
-//            Correo = "admin@admin.com",
-//            HashContrasena = ComputeHash("123456"),
-//            Rol = Roles.Admin,
-//            PlanSuscripcionId = freeId
-//        });
+        // 1) Crear admin
+        ctx.Usuarios.Add(new Usuario
+        {
+            Id = adminId,
+            Correo = "admin@admin.com",
+            HashContrasena = ComputeHash("123456"),
+            Rol = Roles.Admin,
+            PlanSuscripcionId = freeId
+        });
 
-//        // 2) Auto-confirmar su email sin enviar nada
-//        ctx.EmailConfirmations.Add(new EmailConfirmation
-//        {
-//            UsuarioId = adminId,
-//            Token = "",
-//            Expiration = DateTime.UtcNow.AddYears(1),
-//            IsConfirmed = true,
-//            Purpose = ConfirmationPurpose.EmailVerification
-//        });
+        // 2) Auto-confirmar su email sin enviar nada
+        ctx.EmailConfirmations.Add(new EmailConfirmation
+        {
+            UsuarioId = adminId,
+            Token = "",
+            Expiration = DateTime.UtcNow.AddYears(1),
+            IsConfirmed = true,
+            Purpose = ConfirmationPurpose.EmailVerification
+        });
 
-//        ctx.SaveChanges();
-//    }
-//}
-//static string ComputeHash(string plain)
-//{
-//    using var sha = SHA256.Create();
-//    var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(plain));
-//    return Convert.ToBase64String(bytes);
-//}
+        ctx.SaveChanges();
+    }
+}
+static string ComputeHash(string plain)
+{
+    using var sha = SHA256.Create();
+    var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(plain));
+    return Convert.ToBase64String(bytes);
+}
 
 
 app.Run();

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<RaymiMusic.Modelos.LikeCancion>
+
+@{
+    ViewData["Title"] = "Mis Favoritas";
+}
+
+<div class="container py-5">
+    <h2 class="text-white fw-bold mb-4">
+        <i class="fas fa-heart text-spotify-green me-2"></i> Canciones que te gustan
+    </h2>
+
+    @if (!Model.Any())
+    {
+        <div class="card bg-dark text-white border-0 shadow-lg">
+            <div class="card-body text-center py-5">
+                <i class="far fa-heart fa-4x text-muted mb-4"></i>
+                <h4 class="mb-3">Aún no has marcado canciones como favoritas</h4>
+                <p class="text-muted mb-4">Explora canciones y haz clic en el corazón para agregarlas aquí.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-success rounded-pill">
+                    <i class="fas fa-home me-2"></i>Explorar música
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card bg-dark text-white border-0 shadow-lg">
+            <div class="card-header bg-transparent border-bottom border-secondary">
+                <div class="row fw-bold text-muted small text-uppercase">
+                    <div class="col-1 text-center">#</div>
+                    <div class="col-4">Título</div>
+                    <div class="col-2">Álbum</div>
+                    <div class="col-2">Artista</div>
+                    <div class="col-2">Duración</div>
+                    <div class="col-1 text-end">Acciones</div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @{
+                    int index = 1;
+                }
+                @foreach (var like in Model)
+                {
+                    var s = like.Cancion;
+                    if (s == null) { continue; }
+
+                    <div class="row align-items-center p-3 border-bottom border-secondary song-row">
+                        <div class="col-1 text-center">
+                            <span class="text-muted small fw-bold">@index</span>
+                        </div>
+                        <div class="col-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-gradient rounded me-3 d-flex align-items-center justify-content-center"
+                                     style="width: 48px; height: 48px; min-width: 48px;">
+                                    <i class="fas fa-music text-dark"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="fw-bold text-white text-truncate">@s.Titulo</div>
+                                    <small class="text-muted text-truncate d-block">@s.Artista?.NombreArtistico</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <span class="text-muted text-truncate d-block">@s.Album?.Titulo ?? "Sin álbum"</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="text-muted text-truncate d-block">@s.Artista?.NombreArtistico</span>
+                        </div>
+                        <div class="col-2">
+                            <span class="text-muted small">@s.Duracion.ToString(@"mm\:ss")</span>
+                        </div>
+                        <div class="col-1 text-end">
+                            <div class="d-flex gap-1 justify-content-end">
+                                <a asp-controller="Player" asp-action="Play" asp-route-id="@s.Id"
+                                   class="btn btn-success btn-sm rounded-circle play-button"
+                                   style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-play" style="font-size: 0.7rem;"></i>
+                                </a>
+                                <button onclick="toggleLike('@s.Id')" class="btn btn-danger btn-sm rounded-circle" title="Quitar Me Gusta">
+                                    <i class="fas fa-heart-broken"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    index++;
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleLike(id) {
+            fetch('/Player/ToggleLike', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(id)
+            })
+            .then(resp => {
+                if (resp.ok) location.reload();
+            });
+        }
+    </script>
+}

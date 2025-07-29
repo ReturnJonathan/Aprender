@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RaymiMusic.AppWeb.Services;
 using RaymiMusic.AppWeb.Models;
 using System.Security.Claims;
+using RaymiMusic.Modelos;
 
 namespace RaymiMusic.AppWeb.Controllers
 {
@@ -119,6 +120,11 @@ namespace RaymiMusic.AppWeb.Controllers
 
             return View(song);
         }
+        [HttpGet]
+        public IActionResult Error ()
+        {
+            return View();
+        }
 
         [HttpPost]
         public IActionResult ToggleAleatorioAjax()
@@ -127,6 +133,38 @@ namespace RaymiMusic.AppWeb.Controllers
             HttpContext.Session.SetString("ModoAleatorio", (!actual).ToString().ToLower());
 
             return Json(new { estado = !actual });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLike([FromBody] Guid idCancion)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return NotFound();
+
+            var like = await _songService.GetSongLike(Guid.Parse(userId), idCancion);
+            bool liked = false;
+
+            if (like != null)
+            {
+                await _songService.DeleteLike(like.Id);
+            }
+            else
+            {
+                var newLike = new LikeCancion
+                {
+                    UsuarioId = Guid.Parse(userId),
+                    CancionId = idCancion,
+                    FechaCreacion = DateTime.UtcNow
+                };
+                await _songService.CreateLikeAsync(newLike);
+                liked = true;
+            }
+
+            return Json(new { liked });
         }
 
 

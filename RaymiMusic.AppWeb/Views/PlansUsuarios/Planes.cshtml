@@ -3,141 +3,197 @@
     string planActual = ViewBag.PlanActual as string;
 }
 
-<style>
-    .plan-card {
-        min-height: 450px;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
+<!-- Header -->
+<div class="text-center mb-5">
+    <h1 class="text-white fw-bold mb-3">
+        <i class="me-2">👑</i> Elige tu Plan
+    </h1>
+    <p class="text-white-50 lead">Desbloquea todo el potencial de RaymiMusic</p>
+</div>
 
-        .plan-card h4 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .plan-card ul {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            line-height: 2rem;
-        }
-
-        .plan-card p {
-            font-size: 1.2rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .plan-card button {
-            font-size: 1.1rem;
-            padding: 0.6rem 1.2rem;
-        }
-
-    .plan-separator {
-        margin-bottom: 2rem;
-    }
-</style>
-
-<div class="container text-white mt-5">
-    <h2 class="text-center mb-5">Elige tu Plan</h2>
-    <div class="row justify-content-center g-5">
-
-        <!-- Plan Free -->
-        <div class="col-lg-3 col-md-5 plan-separator">
-            <div class="card bg-dark text-white plan-card">
-                <div>
-                    <h4 class="text-center">
-                        Free
-                        @if (planActual == "Free")
-                        {
-                            <span class="badge bg-success ms-2">Plan Actual</span>
-                        }
-                    </h4>
-                    <ul>
-                        <li>Escuchar Música (Con Anuncios)</li>
-                        <li>Seguir Artistas</li>
-                        <li>Crear Playlist</li>
-                    </ul>
+<!-- Grid de planes estilo Spotify -->
+<div class="row g-4 justify-content-center">
+    <!-- Plan Free -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card bg-dark text-white h-100 shadow-lg border-0 plan-card @(planActual == "Free" ? "border-success" : "")">
+            @if (planActual == "Free")
+            {
+                <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="me-1">✅</i> Plan Actual
+                    </span>
                 </div>
-                <div>
-                    <p class="text-center fw-bold">Costo: 0 Dólares Mensuales</p>
-                    <div class="text-center">
-                        <form asp-action="AsignarPlanFree" asp-controller="PlansUsuarios" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-success">
-                                Cancelar Plan Actual
+            }
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="text-center mb-4">
+                    <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                         style="width: 80px; height: 80px;">
+                        <i style="font-size: 2rem;">🎵</i>
+                    </div>
+                    <h3 class="fw-bold">Free</h3>
+                    <div class="display-4 fw-bold text-success mb-2">$0</div>
+                    <p class="text-white-50">Por mes</p>
+                </div>
+
+                <ul class="list-unstyled mb-4 flex-grow-1">
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Escuchar Música (Con Anuncios)
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Seguir Artistas
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Crear Playlist
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-danger me-2">❌</i> Sin descargas
+                    </li>
+                </ul>
+
+                <div class="mt-auto">
+                    @if (planActual == "Free")
+                    {
+                        <button class="btn btn-outline-success btn-lg w-100 rounded-pill" disabled>
+                            <i class="me-1">✅</i> Plan Actual
+                        </button>
+                    }
+                    else
+                    {
+                        <form asp-action="AsignarPlanFree" asp-controller="PlansUsuarios" method="post">
+                            <button type="submit" class="btn btn-outline-light btn-lg w-100 rounded-pill">
+                                Cambiar a Free
                             </button>
                         </form>
-
-                    </div>
+                    }
                 </div>
             </div>
         </div>
-
-        <!-- Plan Estudiantil -->
-        <div class="col-lg-3 col-md-5 plan-separator">
-            <div class="card bg-dark text-white plan-card">
-                <div>
-                    <h4 class="text-center">
-                        Estudiantil
-                        @if (planActual == "Estudiantil")
-                        {
-                            <span class="badge bg-success ms-2">Plan Actual</span>
-                        }
-                    </h4>
-                    <ul>
-                        <li>Escuchar Música (Sin Anuncios)</li>
-                        <li>Seguir Artistas</li>
-                        <li>Crear Playlist</li>
-                    </ul>
-                </div>
-                <div>
-                    <p class="text-center fw-bold">Costo: 3 Dólares Mensuales</p>
-                    <div class="text-center">
-                        <button onclick="location.href='@Url.Action("Create", "Pago", new { plan = "Estudiantil" })'" class="btn btn-outline-success">
-                            Elegir Plan
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Plan Individual -->
-        <div class="col-lg-3 col-md-5 plan-separator">
-            <div class="card bg-dark text-white plan-card">
-                <div>
-                    <h4 class="text-center">
-                        Individual
-                        @if (planActual == "Individual")
-                        {
-                            <span class="badge bg-success ms-2">Plan Actual</span>
-                        }
-                    </h4>
-                    <ul>
-                        <li>Escuchar Música (Sin Anuncios)</li>
-                        <li>Seguir Artistas</li>
-                        <li>Crear Playlist</li>
-                    </ul>
-                </div>
-                <div>
-                    <p class="text-center fw-bold">Costo: 5.99 Dólares Mensuales</p>
-                    <div class="text-center">
-                        <button onclick="location.href='@Url.Action("Create", "Pago", new { plan = "Individual" })'" class="btn btn-outline-success">
-                            Elegir Plan
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <div class="text-center mt-5">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light btn-lg px-4 rounded-pill">
-            ← Volver Atrás
-        </a>
     </div>
 
+    <!-- Plan Estudiantil -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card bg-dark text-white h-100 shadow-lg border-0 plan-card @(planActual == "Estudiantil" ? "border-success" : "")">
+            @if (planActual == "Estudiantil")
+            {
+                <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="me-1">✅</i> Plan Actual
+                    </span>
+                </div>
+            }
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="text-center mb-4">
+                    <div class="bg-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                         style="width: 80px; height: 80px;">
+                        <i style="font-size: 2rem;">🎓</i>
+                    </div>
+                    <h3 class="fw-bold">Estudiantil</h3>
+                    <div class="display-4 fw-bold text-success mb-2">$3</div>
+                    <p class="text-white-50">Por mes</p>
+                </div>
+
+                <ul class="list-unstyled mb-4 flex-grow-1">
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Escuchar Música (Sin Anuncios)
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Seguir Artistas
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Crear Playlist
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Descargas limitadas
+                    </li>
+                </ul>
+
+                <div class="mt-auto">
+                    @if (planActual == "Estudiantil")
+                    {
+                        <button class="btn btn-success btn-lg w-100 rounded-pill" disabled>
+                            <i class="me-1">✅</i> Plan Actual
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Create", "Pago", new { plan = "Estudiantil" })"
+                           class="btn btn-warning btn-lg w-100 rounded-pill">
+                            <i class="me-1">🎓</i> Elegir Plan
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan Individual -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card bg-dark text-white h-100 shadow-lg border-0 plan-card position-relative @(planActual == "Individual" ? "border-success" : "")">
+            <!-- Badge de más popular -->
+            <div class="position-absolute top-0 start-50 translate-middle">
+                <span class="badge bg-success rounded-pill px-3 py-2">
+                    @if (planActual == "Individual")
+                    {
+                        <i class="me-1">✅</i> <text>Plan Actual</text>
+                    }
+                    else
+                    {
+                        <i class="me-1">⭐</i> <text>Más Popular</text>
+                    }
+                </span>
+            </div>
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="text-center mb-4">
+                    <div class="bg-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                         style="width: 80px; height: 80px;">
+                        <i style="font-size: 2rem;">👑</i>
+                    </div>
+                    <h3 class="fw-bold">Individual</h3>
+                    <div class="display-4 fw-bold text-success mb-2">$5.99</div>
+                    <p class="text-white-50">Por mes</p>
+                </div>
+
+                <ul class="list-unstyled mb-4 flex-grow-1">
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Escuchar Música (Sin Anuncios)
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Seguir Artistas
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Crear Playlist
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Descargas ilimitadas
+                    </li>
+                    <li class="mb-2">
+                        <i class="text-success me-2">✅</i> Calidad premium
+                    </li>
+                </ul>
+
+                <div class="mt-auto">
+                    @if (planActual == "Individual")
+                    {
+                        <button class="btn btn-success btn-lg w-100 rounded-pill" disabled>
+                            <i class="me-1">✅</i> Plan Actual
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Create", "Pago", new { plan = "Individual" })"
+                           class="btn btn-success btn-lg w-100 rounded-pill">
+                            <i class="me-1">👑</i> Elegir Plan
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón de navegación -->
+<div class="text-center mt-5">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light btn-lg rounded-pill px-5">
+        <i class="me-2">⬅️</i> Volver al Inicio
+    </a>
 </div>
